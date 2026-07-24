@@ -41,13 +41,13 @@ class EmbeddedNavigationMapView(
         initFlutterChannelHandlers()
         initNavigation()
 
-        if(!(this.arguments?.get("longPressDestinationEnabled") as Boolean)) {
+        if ((this.arguments?.get("longPressDestinationEnabled") as? Boolean) == false) {
             this.binding.navigationView.customizeViewOptions {
                 enableMapLongClickIntercept = false;
             }
         }
 
-        if((this.arguments?.get("enableOnMapTapCallback") as Boolean)) {
+        if ((this.arguments?.get("enableOnMapTapCallback") as? Boolean) == true) {
             this.binding.navigationView.registerMapObserver(onMapClick)
         }
     }
@@ -57,7 +57,7 @@ class EmbeddedNavigationMapView(
     }
 
     override fun dispose() {
-        if((this.arguments?.get("enableOnMapTapCallback") as Boolean)) {
+        if ((this.arguments?.get("enableOnMapTapCallback") as? Boolean) == true) {
             this.binding.navigationView.unregisterMapObserver(onMapClick)
         }
         unregisterObservers()

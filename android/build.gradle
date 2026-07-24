@@ -2,8 +2,8 @@ group 'com.eopeter.fluttermapboxnavigation'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
-    ext.android_gradle_version = '7.4.2'
+    ext.kotlin_version = '2.0.20'
+    ext.android_gradle_version = '8.6.0'
     repositories {
         google()
         mavenCentral()
@@ -55,14 +55,14 @@ apply plugin: 'kotlin-android'
 
 android {
     namespace 'com.eopeter.fluttermapboxnavigation'
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

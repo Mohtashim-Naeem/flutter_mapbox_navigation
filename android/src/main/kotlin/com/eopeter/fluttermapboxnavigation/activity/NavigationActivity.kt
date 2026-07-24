@@ -84,7 +84,7 @@ class NavigationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(R.style.Theme_AppCompat_NoActionBar)
+        setTheme(androidx.appcompat.R.style.Theme_AppCompat_NoActionBar)
         binding = NavigationActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.navigationView.addListener(navigationStateListener)
@@ -146,14 +146,18 @@ class NavigationActivity : AppCompatActivity() {
             }
         }
 
-        registerReceiver(
+        androidx.core.content.ContextCompat.registerReceiver(
+            this,
             finishBroadcastReceiver,
-            IntentFilter(NavigationLauncher.KEY_STOP_NAVIGATION)
+            IntentFilter(NavigationLauncher.KEY_STOP_NAVIGATION),
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
-        registerReceiver(
+        androidx.core.content.ContextCompat.registerReceiver(
+            this,
             addWayPointsBroadcastReceiver,
-            IntentFilter(NavigationLauncher.KEY_ADD_WAYPOINTS)
+            IntentFilter(NavigationLauncher.KEY_ADD_WAYPOINTS),
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
         // TODO set the style Uri
