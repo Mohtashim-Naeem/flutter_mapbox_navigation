@@ -26,7 +26,8 @@ class MapBoxNavigationViewController {
 
   ValueSetter<RouteEvent>? _routeEventNotifier;
 
-  late StreamSubscription<RouteEvent> _routeEventSubscription;
+  StreamSubscription<RouteEvent>? _routeEventSubscription;
+  bool _isDisposed = false;
 
   ///Current Device OS Version
   Future<String> get platformVersion => _methodChannel
@@ -54,6 +55,7 @@ class MapBoxNavigationViewController {
     required List<WayPoint> wayPoints,
     MapBoxOptions? options,
   }) async {
+    if (_isDisposed) return false;
     assert(wayPoints.length > 1, 'Error: WayPoints must be at least 2');
     if (Platform.isIOS && wayPoints.length > 3 && options?.mode != null) {
       assert(
@@ -83,30 +85,32 @@ class MapBoxNavigationViewController {
     }
 
     var i = 0;
-    final wayPointMap = {for (var e in pointList) i++: e};
+    final wayPointMap = {for (final e in pointList) i++: e};
 
     var args = <String, dynamic>{};
     if (options != null) args = options.toMap();
     args['wayPoints'] = wayPointMap;
 
-    _routeEventSubscription = _streamRouteEvent!.listen(_onProgressData);
     return _methodChannel
         .invokeMethod('buildRoute', args)
-        .then((dynamic result) => result as bool);
+        .then((dynamic result) => (result as bool?) ?? false);
   }
 
   /// starts listening for events
   Future<void> initialize() async {
-    _routeEventSubscription = _streamRouteEvent!.listen(_onProgressData);
+    if (_isDisposed) return;
+    _routeEventSubscription ??= _streamRouteEvent?.listen(_onProgressData);
   }
 
   /// Clear the built route and resets the map
   Future<bool?> clearRoute() async {
-    return _methodChannel.invokeMethod('clearRoute', null);
+    if (_isDisposed) return false;
+    return _methodChannel.invokeMethod('clearRoute');
   }
 
   /// Starts Free Drive Mode
   Future<bool?> startFreeDrive({MapBoxOptions? options}) async {
+    if (_isDisposed) return false;
     Map<String, dynamic>? args;
     if (options != null) args = options.toMap();
     return _methodChannel.invokeMethod('startFreeDrive', args);
@@ -114,16 +118,33 @@ class MapBoxNavigationViewController {
 
   /// Starts the Navigation
   Future<bool?> startNavigation({MapBoxOptions? options}) async {
+    if (_isDisposed) return false;
     Map<String, dynamic>? args;
     if (options != null) args = options.toMap();
-    //_routeEventSubscription = _streamRouteEvent.listen(_onProgressData);
     return _methodChannel.invokeMethod('startNavigation', args);
   }
 
   ///Ends Navigation and Closes the Navigation View
   Future<bool?> finishNavigation() async {
-    final success = await _methodChannel.invokeMethod('finishNavigation', null);
+    if (_isDisposed) return false;
+    final success = await _methodChannel.invokeMethod('finishNavigation');
     return success as bool?;
+  }
+
+  /// Performs a safe, idempotent native shutdown of navigation observers and
+  /// trip session
+  Future<bool?> shutdownNavigation() async {
+    if (_isDisposed) return true;
+    _isDisposed = true;
+    await _routeEventSubscription?.cancel();
+    _routeEventSubscription = null;
+    _routeEventNotifier = null;
+    try {
+      final success = await _methodChannel.invokeMethod('shutdownNavigation');
+      return (success as bool?) ?? true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Generic Handler for Messages sent from the Platform
@@ -138,11 +159,17 @@ class MapBoxNavigationViewController {
   /// Call this to cancel the subscription to route events
   /// Add here future disposing methods
   void dispose() {
-    _routeEventSubscription.cancel();
+    if (_isDisposed) return;
+    _isDisposed = true;
+    _routeEventSubscription?.cancel();
+    _routeEventSubscription = null;
+    _routeEventNotifier = null;
   }
 
   void _onProgressData(RouteEvent event) {
-    if (_routeEventNotifier != null) _routeEventNotifier?.call(event);
+    if (!_isDisposed && _routeEventNotifier != null) {
+      _routeEventNotifier?.call(event);
+    }
   }
 
   Stream<RouteEvent>? get _streamRouteEvent {

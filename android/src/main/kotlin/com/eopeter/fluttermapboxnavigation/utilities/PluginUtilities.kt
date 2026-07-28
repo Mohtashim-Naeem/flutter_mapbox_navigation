@@ -33,25 +33,22 @@ class PluginUtilities {
             return context.getString(stringRes)
         }
 
-        fun sendEvent(event: MapBoxRouteProgressEvent) {
+        fun formatEventJson(event: MapBoxRouteProgressEvent): String {
             val dataString = event.toJson()
-            val jsonString = "{" +
+            return "{" +
                     "  \"eventType\": \"${MapBoxEvents.PROGRESS_CHANGE.value}\"," +
                     "  \"data\": $dataString" +
                     "}"
-            FlutterMapboxNavigationPlugin.eventSink?.success(jsonString)
         }
 
-        fun sendEvent(event: MapBoxEvents, data: String = "") {
-            val jsonString =
-                if (MapBoxEvents.MILESTONE_EVENT == event || event == MapBoxEvents.USER_OFF_ROUTE || event == MapBoxEvents.ROUTE_BUILT || event == MapBoxEvents.ON_MAP_TAP) "{" +
-                        "  \"eventType\": \"${event.value}\"," +
-                        "  \"data\": $data" +
-                        "}" else "{" +
-                        "  \"eventType\": \"${event.value}\"," +
-                        "  \"data\": \"$data\"" +
-                        "}"
-            FlutterMapboxNavigationPlugin.eventSink?.success(jsonString)
+        fun formatEventJson(event: MapBoxEvents, data: String = ""): String {
+            return if (MapBoxEvents.MILESTONE_EVENT == event || event == MapBoxEvents.USER_OFF_ROUTE || event == MapBoxEvents.ROUTE_BUILT || event == MapBoxEvents.ON_MAP_TAP) "{" +
+                    "  \"eventType\": \"${event.value}\"," +
+                    "  \"data\": $data" +
+                    "}" else "{" +
+                    "  \"eventType\": \"${event.value}\"," +
+                    "  \"data\": \"$data\"" +
+                    "}"
         }
 
         fun getListOfStringById(key: String, call: MethodCall): ArrayList<String> {

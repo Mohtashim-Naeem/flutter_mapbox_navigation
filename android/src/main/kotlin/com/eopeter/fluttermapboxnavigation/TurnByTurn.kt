@@ -37,6 +37,30 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+
+internal class SingleResultCompleted(private val result: MethodChannel.Result?) {
+    private val completed = AtomicBoolean(false)
+
+    fun success(resultData: Any? = true) {
+        if (completed.compareAndSet(false, true)) {
+            result?.success(resultData)
+        }
+    }
+
+    fun error(errorCode: String, errorMessage: String?, errorDetails: Any? = null) {
+        if (completed.compareAndSet(false, true)) {
+            result?.error(errorCode, errorMessage, errorDetails)
+        }
+    }
+
+    fun notImplemented() {
+        if (completed.compareAndSet(false, true)) {
+            result?.notImplemented()
+        }
+    }
+}
 
 open class TurnByTurn(
     ctx: Context,
@@ -47,12 +71,37 @@ open class TurnByTurn(
     EventChannel.StreamHandler,
     Application.ActivityLifecycleCallbacks {
 
+    val isDisposed = AtomicBoolean(false)
+    val sessionGeneration = AtomicLong(0L)
+    private var eventSink: EventChannel.EventSink? = null
+
+    fun sendEvent(event: MapBoxRouteProgressEvent) {
+        if (isDisposed.get()) return
+        try {
+            val jsonString = PluginUtilities.formatEventJson(event)
+            eventSink?.success(jsonString)
+        } catch (e: Exception) {
+            Log.e("TurnByTurn", "[MapboxLifecycle] Error sending progress event: ${e.message}")
+        }
+    }
+
+    fun sendEvent(event: MapBoxEvents, data: String = "") {
+        if (isDisposed.get()) return
+        try {
+            val jsonString = PluginUtilities.formatEventJson(event, data)
+            eventSink?.success(jsonString)
+        } catch (e: Exception) {
+            Log.e("TurnByTurn", "[MapboxLifecycle] Error sending event $event: ${e.message}")
+        }
+    }
+
     open fun initFlutterChannelHandlers() {
         this.methodChannel?.setMethodCallHandler(this)
         this.eventChannel?.setStreamHandler(this)
     }
 
     open fun initNavigation() {
+        Log.d("TurnByTurn", "[MapboxLifecycle] initNavigation called")
         val navigationOptions = NavigationOptions.Builder(this.context)
             .accessToken(this.token)
             .build()
@@ -66,60 +115,83 @@ open class TurnByTurn(
     }
 
     override fun onMethodCall(methodCall: MethodCall, result: MethodChannel.Result) {
+        val safeResult = SingleResultCompleted(result)
+        if (isDisposed.get() && methodCall.method != "shutdownNavigation") {
+            safeResult.error("DISPOSED", "TurnByTurn instance is already disposed", null)
+            return
+        }
         when (methodCall.method) {
             "getPlatformVersion" -> {
-                result.success("Android ${android.os.Build.VERSION.RELEASE}")
+                safeResult.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "enableOfflineRouting" -> {
-                // downloadRegionForOfflineRouting(call, result)
+                safeResult.error("TODO", "Not Implemented in Android", "will implement soon")
             }
             "buildRoute" -> {
-                this.buildRoute(methodCall, result)
+                this.buildRoute(methodCall, safeResult)
             }
             "clearRoute" -> {
-                this.clearRoute(methodCall, result)
+                this.clearRoute(methodCall, safeResult)
             }
             "startFreeDrive" -> {
                 FlutterMapboxNavigationPlugin.enableFreeDriveMode = true
                 this.startFreeDrive()
+                safeResult.success(true)
             }
             "startNavigation" -> {
                 FlutterMapboxNavigationPlugin.enableFreeDriveMode = false
-                this.startNavigation(methodCall, result)
+                this.startNavigation(methodCall, safeResult)
             }
             "finishNavigation" -> {
-                this.finishNavigation(methodCall, result)
+                this.finishNavigation(methodCall, safeResult)
+            }
+            "shutdownNavigation" -> {
+                this.shutdownNavigation(result)
             }
             "getDistanceRemaining" -> {
-                result.success(this.distanceRemaining)
+                safeResult.success(this.distanceRemaining)
             }
             "getDurationRemaining" -> {
-                result.success(this.durationRemaining)
+                safeResult.success(this.durationRemaining)
             }
-            else -> result.notImplemented()
+            else -> safeResult.notImplemented()
         }
     }
 
-    private fun buildRoute(methodCall: MethodCall, result: MethodChannel.Result) {
+    private fun buildRoute(methodCall: MethodCall, result: SingleResultCompleted) {
+        if (isDisposed.get()) {
+            result.error("DISPOSED", "TurnByTurn disposed", null)
+            return
+        }
         this.isNavigationCanceled = false
+        val currentGen = sessionGeneration.incrementAndGet()
 
         val arguments = methodCall.arguments as? Map<*, *>
         if (arguments != null) this.setOptions(arguments)
         this.addedWaypoints.clear()
-        val points = arguments?.get("wayPoints") as HashMap<*, *>
-        for (item in points) {
-            val point = item.value as HashMap<*, *>
-            val latitude = point["Latitude"] as Double
-            val longitude = point["Longitude"] as Double
-            val isSilent = point["IsSilent"] as Boolean
-            this.addedWaypoints.add(Waypoint(Point.fromLngLat(longitude, latitude),isSilent))
+        val points = arguments?.get("wayPoints") as? HashMap<*, *>
+        if (points != null) {
+            for (item in points) {
+                val point = item.value as HashMap<*, *>
+                val latitude = point["Latitude"] as Double
+                val longitude = point["Longitude"] as Double
+                val isSilent = point["IsSilent"] as Boolean
+                this.addedWaypoints.add(Waypoint(Point.fromLngLat(longitude, latitude), isSilent))
+            }
         }
-        this.getRoute(this.context)
+        Log.d("TurnByTurn", "[MapboxLifecycle] buildRoute requested, generation=$currentGen")
+        this.getRoute(this.context, currentGen)
         result.success(true)
     }
 
-    private fun getRoute(context: Context) {
-        MapboxNavigationApp.current()!!.requestRoutes(
+    private fun getRoute(context: Context, currentGen: Long) {
+        val app = MapboxNavigationApp.current()
+        if (app == null) {
+            Log.e("TurnByTurn", "[MapboxLifecycle] MapboxNavigationApp.current() is null during getRoute")
+            sendEvent(MapBoxEvents.ROUTE_BUILD_FAILED)
+            return
+        }
+        app.requestRoutes(
             routeOptions = RouteOptions
                 .builder()
                 .applyDefaultNavigationOptions(navigationMode)
@@ -139,15 +211,31 @@ open class TurnByTurn(
                     routes: List<NavigationRoute>,
                     routerOrigin: RouterOrigin
                 ) {
+                    if (isDisposed.get() || sessionGeneration.get() != currentGen) {
+                        Log.d("TurnByTurn", "[MapboxLifecycle] onRoutesReady ignored: disposed or stale gen ($currentGen vs ${sessionGeneration.get()})")
+                        return
+                    }
+                    Log.d("TurnByTurn", "[MapboxLifecycle] onRoutesReady received ${routes.size} routes")
                     this@TurnByTurn.currentRoutes = routes
-                    PluginUtilities.sendEvent(
+                    sendEvent(
                         MapBoxEvents.ROUTE_BUILT,
                         Gson().toJson(routes.map { it.directionsRoute.toJson() })
                     )
                     this@TurnByTurn.binding.navigationView.api.routeReplayEnabled(
                         this@TurnByTurn.simulateRoute
                     )
-                    this@TurnByTurn.binding.navigationView.api.startRoutePreview(routes)
+                    val navView = this@TurnByTurn.binding.navigationView
+                    if (navView.width > 0 && navView.height > 0) {
+                        Log.d("TurnByTurn", "[MapboxLifecycle] Starting route preview, view dims: ${navView.width}x${navView.height}")
+                        navView.api.startRoutePreview(routes)
+                    } else {
+                        Log.d("TurnByTurn", "[MapboxLifecycle] View not yet laid out (${navView.width}x${navView.height}), posting startRoutePreview")
+                        navView.post {
+                            if (!isDisposed.get() && sessionGeneration.get() == currentGen) {
+                                navView.api.startRoutePreview(routes)
+                            }
+                        }
+                    }
                     this@TurnByTurn.binding.navigationView.customizeViewBinders {
                         this.infoPanelEndNavigationButtonBinder =
                             CustomInfoPanelEndNavButtonBinder(activity)
@@ -158,69 +246,102 @@ open class TurnByTurn(
                     reasons: List<RouterFailure>,
                     routeOptions: RouteOptions
                 ) {
-                    PluginUtilities.sendEvent(MapBoxEvents.ROUTE_BUILD_FAILED)
+                    if (isDisposed.get() || sessionGeneration.get() != currentGen) return
+                    Log.w("TurnByTurn", "[MapboxLifecycle] route request failed: $reasons")
+                    sendEvent(MapBoxEvents.ROUTE_BUILD_FAILED)
                 }
 
                 override fun onCanceled(
                     routeOptions: RouteOptions,
                     routerOrigin: RouterOrigin
                 ) {
-                    PluginUtilities.sendEvent(MapBoxEvents.ROUTE_BUILD_CANCELLED)
+                    if (isDisposed.get() || sessionGeneration.get() != currentGen) return
+                    Log.d("TurnByTurn", "[MapboxLifecycle] route request canceled")
+                    sendEvent(MapBoxEvents.ROUTE_BUILD_CANCELLED)
                 }
             }
         )
     }
 
-    private fun clearRoute(methodCall: MethodCall, result: MethodChannel.Result) {
+    private fun clearRoute(methodCall: MethodCall, result: SingleResultCompleted) {
+        if (isDisposed.get()) {
+            result.success(true)
+            return
+        }
         this.currentRoutes = null
-        val navigation = MapboxNavigationApp.current()
-        navigation?.stopTripSession()
-        PluginUtilities.sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
+        MapboxNavigationApp.current()?.stopTripSession()
+        sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
+        result.success(true)
     }
 
     private fun startFreeDrive() {
         this.binding.navigationView.api.startFreeDrive()
     }
 
-    private fun startNavigation(methodCall: MethodCall, result: MethodChannel.Result) {
+    private fun startNavigation(methodCall: MethodCall, result: SingleResultCompleted) {
         val arguments = methodCall.arguments as? Map<*, *>
         if (arguments != null) {
             this.setOptions(arguments)
         }
 
-        this.startNavigation()
-
-        if (this.currentRoutes != null) {
-            result.success(true)
-        } else {
-            result.success(false)
-        }
+        val success = this.startNavigation()
+        result.success(success)
     }
 
-    private fun finishNavigation(methodCall: MethodCall, result: MethodChannel.Result) {
+    private fun finishNavigation(methodCall: MethodCall, result: SingleResultCompleted) {
         this.finishNavigation()
-
-        if (this.currentRoutes != null) {
-            result.success(true)
-        } else {
-            result.success(false)
-        }
+        result.success(true)
     }
 
     @SuppressLint("MissingPermission")
-    private fun startNavigation() {
-        if (this.currentRoutes == null) {
-            PluginUtilities.sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
-            return
+    private fun startNavigation(): Boolean {
+        if (this.isDisposed.get() || this.currentRoutes == null) {
+            sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
+            return false
         }
-        this.binding.navigationView.api.startActiveGuidance(this.currentRoutes!!)
-        PluginUtilities.sendEvent(MapBoxEvents.NAVIGATION_RUNNING)
+        Log.d("TurnByTurn", "[MapboxLifecycle] startNavigation called")
+        val navView = this.binding.navigationView
+        val routes = this.currentRoutes!!
+        if (navView.width > 0 && navView.height > 0) {
+            Log.d("TurnByTurn", "[MapboxLifecycle] Starting active guidance, view dims: ${navView.width}x${navView.height}")
+            navView.api.startActiveGuidance(routes)
+        } else {
+            Log.d("TurnByTurn", "[MapboxLifecycle] View not yet laid out (${navView.width}x${navView.height}), posting startActiveGuidance")
+            navView.post {
+                if (!isDisposed.get() && currentRoutes != null) {
+                    navView.api.startActiveGuidance(routes)
+                }
+            }
+        }
+        sendEvent(MapBoxEvents.NAVIGATION_RUNNING)
+        return true
     }
 
     private fun finishNavigation(isOffRouted: Boolean = false) {
-        MapboxNavigationApp.current()!!.stopTripSession()
+        MapboxNavigationApp.current()?.stopTripSession()
         this.isNavigationCanceled = true
-        PluginUtilities.sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
+        sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
+    }
+
+    fun shutdownNavigation(result: MethodChannel.Result? = null) {
+        val safeResult = SingleResultCompleted(result)
+        Log.d("TurnByTurn", "[MapboxLifecycle] shutdownNavigation called")
+        if (!isDisposed.compareAndSet(false, true)) {
+            Log.d("TurnByTurn", "[MapboxLifecycle] shutdownNavigation already disposed")
+            safeResult.success(true)
+            return
+        }
+        sessionGeneration.incrementAndGet()
+        try {
+            MapboxNavigationApp.current()?.stopTripSession()
+            unregisterObservers()
+        } catch (e: Exception) {
+            Log.e("TurnByTurn", "[MapboxLifecycle] Error during shutdownNavigation: ${e.message}")
+        } finally {
+            this.currentRoutes = null
+            this.eventSink = null
+            safeResult.success(true)
+        }
     }
 
     private fun setOptions(arguments: Map<*, *>) {
@@ -256,14 +377,13 @@ open class TurnByTurn(
         this.mapStyleUrlDay = arguments["mapStyleUrlDay"] as? String
         this.mapStyleUrlNight = arguments["mapStyleUrlNight"] as? String
 
-        //Set the style Uri
         if (this.mapStyleUrlDay == null) this.mapStyleUrlDay = Style.MAPBOX_STREETS
         if (this.mapStyleUrlNight == null) this.mapStyleUrlNight = Style.DARK
 
         this@TurnByTurn.binding.navigationView.customizeViewOptions {
             mapStyleUriDay = this@TurnByTurn.mapStyleUrlDay
             mapStyleUriNight = this@TurnByTurn.mapStyleUrlNight
-        }           
+        }
 
         this.initialLatitude = arguments["initialLatitude"] as? Double
         this.initialLongitude = arguments["initialLongitude"] as? Double
@@ -320,7 +440,7 @@ open class TurnByTurn(
     }
 
     open fun registerObservers() {
-        // register event listeners
+        Log.d("TurnByTurn", "[MapboxLifecycle] Registering trip observers")
         MapboxNavigationApp.current()?.registerBannerInstructionsObserver(this.bannerInstructionObserver)
         MapboxNavigationApp.current()?.registerVoiceInstructionsObserver(this.voiceInstructionObserver)
         MapboxNavigationApp.current()?.registerOffRouteObserver(this.offRouteObserver)
@@ -331,7 +451,7 @@ open class TurnByTurn(
     }
 
     open fun unregisterObservers() {
-        // unregister event listeners to prevent leaks or unnecessary resource consumption
+        Log.d("TurnByTurn", "[MapboxLifecycle] Unregistering trip observers")
         MapboxNavigationApp.current()?.unregisterBannerInstructionsObserver(this.bannerInstructionObserver)
         MapboxNavigationApp.current()?.unregisterVoiceInstructionsObserver(this.voiceInstructionObserver)
         MapboxNavigationApp.current()?.unregisterOffRouteObserver(this.offRouteObserver)
@@ -341,13 +461,16 @@ open class TurnByTurn(
         MapboxNavigationApp.current()?.unregisterArrivalObserver(this.arrivalObserver)
     }
 
-    // Flutter stream listener delegate methods
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        FlutterMapboxNavigationPlugin.eventSink = events
+        if (!isDisposed.get()) {
+            this.eventSink = events
+            Log.d("TurnByTurn", "[MapboxLifecycle] EventChannel onListen attached")
+        }
     }
 
     override fun onCancel(arguments: Any?) {
-        FlutterMapboxNavigationPlugin.eventSink = null
+        this.eventSink = null
+        Log.d("TurnByTurn", "[MapboxLifecycle] EventChannel onCancel detached")
     }
 
     private val context: Context = ctx
@@ -357,16 +480,11 @@ open class TurnByTurn(
     open var eventChannel: EventChannel? = null
     private var lastLocation: Location? = null
 
-    /**
-     * Helper class that keeps added waypoints and transforms them to the [RouteOptions] params.
-     */
     private val addedWaypoints = WaypointSet()
 
-    // Config
     private var initialLatitude: Double? = null
     private var initialLongitude: Double? = null
 
-    // val wayPoints: MutableList<Point> = mutableListOf()
     private var navigationMode = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
     var simulateRoute = false
     private var mapStyleUrlDay: String? = null
@@ -393,105 +511,87 @@ open class TurnByTurn(
     private var currentRoutes: List<NavigationRoute>? = null
     private var isNavigationCanceled = false
 
-    /**
-     * Bindings to the example layout.
-     */
     open val binding: NavigationActivityBinding = bind
 
-    /**
-     * Gets notified with location updates.
-     *
-     * Exposes raw updates coming directly from the location services
-     * and the updates enhanced by the Navigation SDK (cleaned up and matched to the road).
-     */
     private val locationObserver = object : LocationObserver {
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            if (isDisposed.get()) return
             this@TurnByTurn.lastLocation = locationMatcherResult.enhancedLocation
         }
 
-        override fun onNewRawLocation(rawLocation: Location) {
-            // no impl
-        }
+        override fun onNewRawLocation(rawLocation: Location) {}
     }
 
     private val bannerInstructionObserver = BannerInstructionsObserver { bannerInstructions ->
-        PluginUtilities.sendEvent(MapBoxEvents.BANNER_INSTRUCTION, bannerInstructions.primary().text())
+        if (isDisposed.get()) return@BannerInstructionsObserver
+        sendEvent(MapBoxEvents.BANNER_INSTRUCTION, bannerInstructions.primary().text())
     }
 
     private val voiceInstructionObserver = VoiceInstructionsObserver { voiceInstructions ->
-        PluginUtilities.sendEvent(MapBoxEvents.SPEECH_ANNOUNCEMENT, voiceInstructions.announcement().toString())
+        if (isDisposed.get()) return@VoiceInstructionsObserver
+        sendEvent(MapBoxEvents.SPEECH_ANNOUNCEMENT, voiceInstructions.announcement().toString())
     }
 
     private val offRouteObserver = OffRouteObserver { offRoute ->
+        if (isDisposed.get()) return@OffRouteObserver
         if (offRoute) {
-            PluginUtilities.sendEvent(MapBoxEvents.USER_OFF_ROUTE)
+            sendEvent(MapBoxEvents.USER_OFF_ROUTE)
         }
     }
 
     private val routesObserver = RoutesObserver { routeUpdateResult ->
+        if (isDisposed.get()) return@RoutesObserver
         if (routeUpdateResult.navigationRoutes.isNotEmpty()) {
-            PluginUtilities.sendEvent(MapBoxEvents.REROUTE_ALONG);
+            sendEvent(MapBoxEvents.REROUTE_ALONG)
         }
     }
 
-    /**
-     * Gets notified with progress along the currently active route.
-     */
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        // update flutter events
-        if (!this.isNavigationCanceled) {
-            try {
-
-                this.distanceRemaining = routeProgress.distanceRemaining
-                this.durationRemaining = routeProgress.durationRemaining
-
-                val progressEvent = MapBoxRouteProgressEvent(routeProgress)
-                PluginUtilities.sendEvent(progressEvent)
-            } catch (_: java.lang.Exception) {
-                // handle this error
-            }
-        }
+        if (isDisposed.get() || this.isNavigationCanceled) return@RouteProgressObserver
+        try {
+            this.distanceRemaining = routeProgress.distanceRemaining
+            this.durationRemaining = routeProgress.durationRemaining
+            val progressEvent = MapBoxRouteProgressEvent(routeProgress)
+            sendEvent(progressEvent)
+        } catch (_: java.lang.Exception) {}
     }
 
     private val arrivalObserver: ArrivalObserver = object : ArrivalObserver {
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
-            PluginUtilities.sendEvent(MapBoxEvents.ON_ARRIVAL)
+            if (isDisposed.get()) return
+            sendEvent(MapBoxEvents.ON_ARRIVAL)
         }
 
-        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
-            // not impl
-        }
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {}
 
-        override fun onWaypointArrival(routeProgress: RouteProgress) {
-            // not impl
-        }
+        override fun onWaypointArrival(routeProgress: RouteProgress) {}
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        Log.d("Embedded", "onActivityCreated not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityCreated")
     }
 
     override fun onActivityStarted(activity: Activity) {
-        Log.d("Embedded", "onActivityStarted not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityStarted")
     }
 
     override fun onActivityResumed(activity: Activity) {
-        Log.d("Embedded", "onActivityResumed not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityResumed")
     }
 
     override fun onActivityPaused(activity: Activity) {
-        Log.d("Embedded", "onActivityPaused not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityPaused")
     }
 
     override fun onActivityStopped(activity: Activity) {
-        Log.d("Embedded", "onActivityStopped not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityStopped")
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-        Log.d("Embedded", "onActivitySaveInstanceState not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivitySaveInstanceState")
     }
 
     override fun onActivityDestroyed(activity: Activity) {
-        Log.d("Embedded", "onActivityDestroyed not implemented")
+        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityDestroyed")
     }
 }

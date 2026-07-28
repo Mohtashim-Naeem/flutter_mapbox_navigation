@@ -18,7 +18,6 @@ import com.eopeter.fluttermapboxnavigation.models.Waypoint
 import com.eopeter.fluttermapboxnavigation.models.WaypointSet
 import com.eopeter.fluttermapboxnavigation.utilities.CustomInfoPanelEndNavButtonBinder
 import com.eopeter.fluttermapboxnavigation.utilities.PluginUtilities
-import com.eopeter.fluttermapboxnavigation.utilities.PluginUtilities.Companion.sendEvent
 import com.google.gson.Gson
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -463,4 +462,7 @@ class NavigationActivity : AppCompatActivity() {
             return false
         }
     }
+
+    private fun sendEvent(event: MapBoxRouteProgressEvent) {}
+    private fun sendEvent(event: MapBoxEvents, data: String = "") {}
 }

@@ -22,11 +22,9 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.platform.PlatformViewRegistry
 
 /** FlutterMapboxNavigationPlugin */
-class FlutterMapboxNavigationPlugin : FlutterPlugin, MethodCallHandler,
-    EventChannel.StreamHandler, ActivityAware {
+class FlutterMapboxNavigationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
-    private lateinit var progressEventChannel: EventChannel
     private var currentActivity: Activity? = null
     private lateinit var currentContext: Context
 
@@ -35,18 +33,11 @@ class FlutterMapboxNavigationPlugin : FlutterPlugin, MethodCallHandler,
         channel = MethodChannel(messenger, "flutter_mapbox_navigation")
         channel.setMethodCallHandler(this)
 
-        progressEventChannel = EventChannel(messenger, "flutter_mapbox_navigation/events")
-        progressEventChannel.setStreamHandler(this)
-
         platformViewRegistry = binding.platformViewRegistry
         binaryMessenger = messenger
-
-
     }
 
     companion object {
-
-        var eventSink: EventChannel.EventSink? = null
 
         var PERMISSION_REQUEST_CODE: Int = 367
 
@@ -242,18 +233,9 @@ class FlutterMapboxNavigationPlugin : FlutterPlugin, MethodCallHandler,
         NavigationLauncher.addWayPoints(currentActivity, wayPoints)
     }
 
-    override fun onListen(args: Any?, events: EventChannel.EventSink?) {
-        eventSink = events
-    }
-
-    override fun onCancel(args: Any?) {
-        eventSink = null
-    }
-
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         currentActivity = null
         channel.setMethodCallHandler(null)
-        progressEventChannel.setStreamHandler(null)
     }
 
     override fun onDetachedFromActivity() {
