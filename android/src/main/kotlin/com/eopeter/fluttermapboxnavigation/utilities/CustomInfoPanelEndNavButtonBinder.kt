@@ -3,8 +3,6 @@ package com.eopeter.fluttermapboxnavigation.utilities
 import android.app.Activity
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.eopeter.fluttermapboxnavigation.activity.NavigationLauncher
-import com.eopeter.fluttermapboxnavigation.models.MapBoxEvents
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
@@ -13,7 +11,8 @@ import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.base.view.MapboxExtendableButton
 
 class CustomInfoPanelEndNavButtonBinder(
-    val activity: Activity
+    val activity: Activity,
+    private val onExit: (() -> Unit)? = null
 ) : UIBinder {
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
         val button = MapboxExtendableButton(
@@ -35,8 +34,12 @@ class CustomInfoPanelEndNavButtonBinder(
             override fun onAttached(mapboxNavigation: MapboxNavigation) {
                 super.onAttached(mapboxNavigation)
                 button.setOnClickListener {
-                    mapboxNavigation.stopTripSession()
-                    activity.finish()
+                    if (onExit != null) {
+                        onExit.invoke()
+                    } else {
+                        mapboxNavigation.stopTripSession()
+                        activity.finish()
+                    }
                 }
             }
         }

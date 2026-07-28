@@ -33,6 +33,8 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.*
+import com.mapbox.navigation.ui.base.lifecycle.UIBinder
+import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -237,8 +239,11 @@ open class TurnByTurn(
                         }
                     }
                     this@TurnByTurn.binding.navigationView.customizeViewBinders {
-                        this.infoPanelEndNavigationButtonBinder =
-                            CustomInfoPanelEndNavButtonBinder(activity)
+                        // Remove native close button from bottom info panel to use Flutter UI close button instead
+                        this.infoPanelEndNavigationButtonBinder = UIBinder { viewGroup ->
+                            viewGroup.removeAllViews()
+                            object : UIComponent() {}
+                        }
                     }
                 }
 
