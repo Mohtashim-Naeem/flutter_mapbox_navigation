@@ -175,6 +175,7 @@ class MapBoxNavigationViewController {
   Stream<RouteEvent>? get _streamRouteEvent {
     return _eventChannel
         .receiveBroadcastStream()
+        .where((dynamic event) => event != null && event is String)
         .map((dynamic event) => _parseRouteEvent(event as String));
   }
 
