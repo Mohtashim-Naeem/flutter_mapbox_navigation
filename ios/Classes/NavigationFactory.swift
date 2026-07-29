@@ -226,6 +226,12 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
         _animateBuildRoute = arguments?["animateBuildRoute"] as? Bool ?? _animateBuildRoute
         _longPressDestinationEnabled = arguments?["longPressDestinationEnabled"] as? Bool ?? _longPressDestinationEnabled
         _alternatives = arguments?["alternatives"] as? Bool ?? _alternatives
+        
+        let token = (arguments?["token"] as? String) ?? (Bundle.main.object(forInfoDictionaryKey: "MBXAccessToken") as? String)
+        if let token = token, !token.isEmpty, token != "$(MAPBOX_ACCESS_TOKEN)" {
+            ResourceOptionsManager.default.resourceOptions.accessToken = token
+            NavigationSettings.shared.accessToken = token
+        }
     }
     
     
