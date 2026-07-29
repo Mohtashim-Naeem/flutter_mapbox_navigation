@@ -230,7 +230,6 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
         let token = (arguments?["token"] as? String) ?? (Bundle.main.object(forInfoDictionaryKey: "MBXAccessToken") as? String)
         if let token = token, !token.isEmpty, token != "$(MAPBOX_ACCESS_TOKEN)" {
             ResourceOptionsManager.default.resourceOptions.accessToken = token
-            NavigationSettings.shared.accessToken = token
         }
     }
     
