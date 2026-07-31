@@ -193,12 +193,11 @@ open class TurnByTurn(
             sendEvent(MapBoxEvents.ROUTE_BUILD_FAILED)
             return
         }
-        val locale = PluginUtilities.getLocaleFromCode(navigationLanguage)
         app.requestRoutes(
             routeOptions = RouteOptions
                 .builder()
                 .applyDefaultNavigationOptions(navigationMode)
-                .applyLanguageAndVoiceUnitOptions(locale)
+                .applyLanguageAndVoiceUnitOptions(context)
                 .coordinatesList(this.addedWaypoints.coordinatesList())
                 .waypointIndicesList(this.addedWaypoints.waypointsIndices())
                 .waypointNamesList(this.addedWaypoints.waypointsNames())
