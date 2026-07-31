@@ -102,13 +102,13 @@ class PluginUtilities {
             val locales: Array<Locale> = Locale.getAvailableLocales()
 
             val filtered = locales.filter {
-                it.country.equals(locale, ignoreCase = true)
+                it.language.equals(locale, ignoreCase = true) || it.country.equals(locale, ignoreCase = true)
             }
 
             return if (filtered.isNotEmpty()) {
                 filtered.first()
             } else {
-                Locale.ENGLISH
+                Locale(locale)
             }
         }
 
