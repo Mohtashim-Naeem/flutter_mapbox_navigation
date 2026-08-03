@@ -107,7 +107,6 @@ open class TurnByTurn(
     }
 
     open fun initNavigation() {
-        Log.d("TurnByTurn", "[MapboxLifecycle] initNavigation called")
         val locale = PluginUtilities.getLocaleFromCode(this.navigationLanguage)
         val unitType = if (this.navigationVoiceUnits == DirectionsCriteria.IMPERIAL) UnitType.IMPERIAL else UnitType.METRIC
         val distanceFormatterOptions = DistanceFormatterOptions.Builder(this.context)
@@ -196,7 +195,6 @@ open class TurnByTurn(
                 this.addedWaypoints.add(Waypoint(Point.fromLngLat(longitude, latitude), isSilent))
             }
         }
-        Log.d("TurnByTurn", "[MapboxLifecycle] buildRoute requested, generation=$currentGen")
         this.getRoute(this.context, currentGen)
         result.success(true)
     }
@@ -229,10 +227,8 @@ open class TurnByTurn(
                     routerOrigin: RouterOrigin
                 ) {
                     if (isDisposed.get() || sessionGeneration.get() != currentGen) {
-                        Log.d("TurnByTurn", "[MapboxLifecycle] onRoutesReady ignored: disposed or stale gen ($currentGen vs ${sessionGeneration.get()})")
                         return
                     }
-                    Log.d("TurnByTurn", "[MapboxLifecycle] onRoutesReady received ${routes.size} routes")
                     this@TurnByTurn.currentRoutes = routes
                     sendEvent(
                         MapBoxEvents.ROUTE_BUILT,
@@ -243,10 +239,8 @@ open class TurnByTurn(
                     )
                     val navView = this@TurnByTurn.binding.navigationView
                     if (navView.width > 0 && navView.height > 0) {
-                        Log.d("TurnByTurn", "[MapboxLifecycle] Starting route preview, view dims: ${navView.width}x${navView.height}")
                         navView.api.startRoutePreview(routes)
                     } else {
-                        Log.d("TurnByTurn", "[MapboxLifecycle] View not yet laid out (${navView.width}x${navView.height}), posting startRoutePreview")
                         navView.post {
                             if (!isDisposed.get() && sessionGeneration.get() == currentGen) {
                                 navView.api.startRoutePreview(routes)
@@ -277,7 +271,6 @@ open class TurnByTurn(
                     routerOrigin: RouterOrigin
                 ) {
                     if (isDisposed.get() || sessionGeneration.get() != currentGen) return
-                    Log.d("TurnByTurn", "[MapboxLifecycle] route request canceled")
                     sendEvent(MapBoxEvents.ROUTE_BUILD_CANCELLED)
                 }
             }
@@ -320,14 +313,11 @@ open class TurnByTurn(
             sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
             return false
         }
-        Log.d("TurnByTurn", "[MapboxLifecycle] startNavigation called")
         val navView = this.binding.navigationView
         val routes = this.currentRoutes!!
         if (navView.width > 0 && navView.height > 0) {
-            Log.d("TurnByTurn", "[MapboxLifecycle] Starting active guidance, view dims: ${navView.width}x${navView.height}")
             navView.api.startActiveGuidance(routes)
         } else {
-            Log.d("TurnByTurn", "[MapboxLifecycle] View not yet laid out (${navView.width}x${navView.height}), posting startActiveGuidance")
             navView.post {
                 if (!isDisposed.get() && currentRoutes != null) {
                     navView.api.startActiveGuidance(routes)
@@ -347,9 +337,7 @@ open class TurnByTurn(
 
     fun shutdownNavigation(result: MethodChannel.Result? = null) {
         val safeResult = SingleResultCompleted(result)
-        Log.d("TurnByTurn", "[MapboxLifecycle] shutdownNavigation called")
         if (!isDisposed.compareAndSet(false, true)) {
-            Log.d("TurnByTurn", "[MapboxLifecycle] shutdownNavigation already disposed")
             safeResult.success(true)
             return
         }
@@ -417,9 +405,11 @@ open class TurnByTurn(
             mapStyleUriNight = this@TurnByTurn.mapStyleUrlNight
         }
 
-        val isDark = this.mapStyleUrlDay?.contains("cms8muggq") == true ||
-                     this.mapStyleUrlNight?.contains("cms8muggq") == true ||
-                     this.mapStyleUrlDay?.contains("dark") == true
+        // Detect dark mode: if day and night styles are identical, the Flutter side
+        // passed the same (dark) style for both slots. Also catch explicit "dark" keyword.
+        val isDark = (this.mapStyleUrlDay == this.mapStyleUrlNight &&
+                      this.mapStyleUrlDay != Style.MAPBOX_STREETS) ||
+                     this.mapStyleUrlDay?.lowercase()?.contains("dark") == true
 
         val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
         val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
@@ -484,7 +474,6 @@ open class TurnByTurn(
     }
 
     open fun registerObservers() {
-        Log.d("TurnByTurn", "[MapboxLifecycle] Registering trip observers")
         MapboxNavigationApp.current()?.registerBannerInstructionsObserver(this.bannerInstructionObserver)
         MapboxNavigationApp.current()?.registerVoiceInstructionsObserver(this.voiceInstructionObserver)
         MapboxNavigationApp.current()?.registerOffRouteObserver(this.offRouteObserver)
@@ -495,7 +484,6 @@ open class TurnByTurn(
     }
 
     open fun unregisterObservers() {
-        Log.d("TurnByTurn", "[MapboxLifecycle] Unregistering trip observers")
         MapboxNavigationApp.current()?.unregisterBannerInstructionsObserver(this.bannerInstructionObserver)
         MapboxNavigationApp.current()?.unregisterVoiceInstructionsObserver(this.voiceInstructionObserver)
         MapboxNavigationApp.current()?.unregisterOffRouteObserver(this.offRouteObserver)
@@ -508,13 +496,11 @@ open class TurnByTurn(
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         if (!isDisposed.get()) {
             this.eventSink = events
-            Log.d("TurnByTurn", "[MapboxLifecycle] EventChannel onListen attached")
         }
     }
 
     override fun onCancel(arguments: Any?) {
         this.eventSink = null
-        Log.d("TurnByTurn", "[MapboxLifecycle] EventChannel onCancel detached")
     }
 
     private val context: Context = ctx
@@ -612,30 +598,17 @@ open class TurnByTurn(
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityCreated")
     }
 
-    override fun onActivityStarted(activity: Activity) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityStarted")
-    }
+    override fun onActivityStarted(activity: Activity) {}
 
-    override fun onActivityResumed(activity: Activity) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityResumed")
-    }
+    override fun onActivityResumed(activity: Activity) {}
 
-    override fun onActivityPaused(activity: Activity) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityPaused")
-    }
+    override fun onActivityPaused(activity: Activity) {}
 
-    override fun onActivityStopped(activity: Activity) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityStopped")
-    }
+    override fun onActivityStopped(activity: Activity) {}
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivitySaveInstanceState")
-    }
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
-    override fun onActivityDestroyed(activity: Activity) {
-        Log.d("TurnByTurn", "[MapboxLifecycle] onActivityDestroyed")
-    }
+    override fun onActivityDestroyed(activity: Activity) {}
 }
