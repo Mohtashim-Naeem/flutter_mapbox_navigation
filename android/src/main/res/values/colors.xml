@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2D4E73</color>
-    <color name="colorPrimaryDark">#2D4E73</color>
-    <color name="colorAccent">#2D4E73</color>
-    <color name="ic_launcher_background">#2D4E73</color>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="ic_launcher_background">#008577</color>
     <color name="red">#FF0000</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- Maneuver banner — matches Flutter AppColors surfaces -->
+    <color name="epic_banner_bg_dark">#121212</color>
+    <color name="epic_banner_sub_bg_dark">#1C1C1C</color>
+    <color name="epic_maneuver_bg_light">#F7F8F7</color>
+    <color name="epic_maneuver_sub_bg_light">#F2F3F2</color>
+    <color name="epic_panel_bg_light">#FFFFFF</color>
+    <color name="epic_panel_text_dark">#F5F7F5</color>
+    <color name="epic_panel_text_light">#0F1210</color>
 </resources>

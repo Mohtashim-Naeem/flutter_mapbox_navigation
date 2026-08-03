@@ -20,4 +20,4 @@ public class FlutterMapboxNavigationViewFactory : NSObject, FlutterPlatformViewF
     public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         return FlutterStandardMessageCodec.sharedInstance()
     }
-}
+}   

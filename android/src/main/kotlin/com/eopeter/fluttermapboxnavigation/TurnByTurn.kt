@@ -22,6 +22,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -35,6 +37,8 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.*
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
+import com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -104,8 +108,16 @@ open class TurnByTurn(
 
     open fun initNavigation() {
         Log.d("TurnByTurn", "[MapboxLifecycle] initNavigation called")
+        val locale = PluginUtilities.getLocaleFromCode(this.navigationLanguage)
+        val unitType = if (this.navigationVoiceUnits == DirectionsCriteria.IMPERIAL) UnitType.IMPERIAL else UnitType.METRIC
+        val distanceFormatterOptions = DistanceFormatterOptions.Builder(this.context)
+            .locale(locale)
+            .unitType(unitType)
+            .build()
+
         val navigationOptions = NavigationOptions.Builder(this.context)
             .accessToken(this.token)
+            .distanceFormatterOptions(distanceFormatterOptions)
             .build()
 
         MapboxNavigationApp
@@ -245,6 +257,7 @@ open class TurnByTurn(
                             object : UIComponent() {}
                         }
                     }
+
                 }
 
                 override fun onFailure(
@@ -319,6 +332,7 @@ open class TurnByTurn(
             }
         }
         sendEvent(MapBoxEvents.NAVIGATION_RUNNING)
+
         return true
     }
 
@@ -349,7 +363,7 @@ open class TurnByTurn(
         }
     }
 
-    private fun setOptions(arguments: Map<*, *>) {
+    open fun setOptions(arguments: Map<*, *>) {
         val navMode = arguments["mode"] as? String
         if (navMode != null) {
             when (navMode) {
@@ -379,8 +393,18 @@ open class TurnByTurn(
             }
         }
 
-        this.mapStyleUrlDay = arguments["mapStyleUrlDay"] as? String
-        this.mapStyleUrlNight = arguments["mapStyleUrlNight"] as? String
+        val dayStyle = arguments["mapStyleUrlDay"] as? String
+        val nightStyle = arguments["mapStyleUrlNight"] as? String
+
+        if (dayStyle != null) this.mapStyleUrlDay = dayStyle
+        if (nightStyle != null) this.mapStyleUrlNight = nightStyle
+
+        if (this.mapStyleUrlDay == null && this.mapStyleUrlNight != null) {
+            this.mapStyleUrlDay = this.mapStyleUrlNight
+        }
+        if (this.mapStyleUrlNight == null && this.mapStyleUrlDay != null) {
+            this.mapStyleUrlNight = this.mapStyleUrlDay
+        }
 
         if (this.mapStyleUrlDay == null) this.mapStyleUrlDay = Style.MAPBOX_STREETS
         if (this.mapStyleUrlNight == null) this.mapStyleUrlNight = Style.DARK
@@ -388,6 +412,18 @@ open class TurnByTurn(
         this@TurnByTurn.binding.navigationView.customizeViewOptions {
             mapStyleUriDay = this@TurnByTurn.mapStyleUrlDay
             mapStyleUriNight = this@TurnByTurn.mapStyleUrlNight
+        }
+
+        val isDark = this.mapStyleUrlDay?.contains("cms8muggq") == true ||
+                     this.mapStyleUrlNight?.contains("cms8muggq") == true ||
+                     this.mapStyleUrlDay?.contains("dark") == true
+
+        val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
+        val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
+
+        this@TurnByTurn.binding.navigationView.customizeViewStyles {
+            infoPanelBackground = panelBgDrawable
+            tripProgressStyle = progressStyle
         }
 
         this.initialLatitude = arguments["initialLatitude"] as? Double
@@ -495,7 +531,7 @@ open class TurnByTurn(
     private var mapStyleUrlDay: String? = null
     private var mapStyleUrlNight: String? = null
     private var navigationLanguage = "en"
-    private var navigationVoiceUnits = DirectionsCriteria.IMPERIAL
+    private var navigationVoiceUnits = DirectionsCriteria.METRIC
     private var zoom = 15.0
     private var bearing = 0.0
     private var tilt = 0.0

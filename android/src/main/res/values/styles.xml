@@ -9,21 +9,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="MapboxCustomTripProgressStyle" parent="MapboxStyleTripProgressView">
-        <item name="tripProgressTextColor">#7B3CEA</item>
-        <item name="tripProgressViewBackgroundColor">#EEEEEE</item>
+    <style name="EpicTripProgressStyleLight" parent="MapboxStyleTripProgressView">
+        <item name="tripProgressViewBackgroundColor">@color/epic_panel_bg_light</item>
+        <item name="tripProgressTextColor">@color/epic_panel_text_light</item>
     </style>
 
-    <style name="MapboxCustomManeuverTurnIconStyle" parent="MapboxStyleTurnIconManeuver">
-        <item name="maneuverTurnIconColor">#FFEB3B</item>
-        <item name="maneuverTurnIconShadowColor">#7A6E03</item>
-    </style>
-
-    <style name="MapboxCustomManeuverStyle" parent="MapboxStyleManeuverView">
-        <item name="maneuverViewBackgroundColor">#058A0A</item>
-        <item name="subManeuverViewBackgroundColor">#046808</item>
-        <item name="upcomingManeuverViewBackgroundColor">#046808</item>
-        <item name="maneuverViewIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
-        <item name="laneGuidanceManeuverIconStyle">@style/MapboxCustomManeuverTurnIconStyle</item>
+    <style name="EpicTripProgressStyleDark" parent="MapboxStyleTripProgressView">
+        <item name="tripProgressViewBackgroundColor">@color/epic_banner_bg_dark</item>
+        <item name="tripProgressTextColor">@color/epic_panel_text_dark</item>
     </style>
 </resources>

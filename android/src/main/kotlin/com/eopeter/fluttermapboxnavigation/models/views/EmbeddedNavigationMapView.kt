@@ -40,6 +40,9 @@ class EmbeddedNavigationMapView(
     open fun initialize() {
         Log.d("EmbeddedNavView", "[MapboxLifecycle] EmbeddedNavigationMapView initialize, viewId=$viewId")
         initFlutterChannelHandlers()
+        if (this.arguments != null) {
+            setOptions(this.arguments)
+        }
         initNavigation()
 
         if ((this.arguments?.get("longPressDestinationEnabled") as? Boolean) == false) {
