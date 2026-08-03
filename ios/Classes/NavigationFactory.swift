@@ -42,6 +42,23 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
     var _enableOnMapTapCallback = false
     var navigationDirections: Directions?
     
+    func getTopViewController() -> UIViewController? {
+        var topVC: UIViewController? = nil
+        if #available(iOS 13.0, *) {
+            topVC = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first(where: { $0.isKeyWindow })?.rootViewController
+        }
+        if topVC == nil {
+            topVC = UIApplication.shared.delegate?.window??.rootViewController
+        }
+        while let presented = topVC?.presentedViewController {
+            topVC = presented
+        }
+        return topVC
+    }
+    
     func addWayPoints(arguments: NSDictionary?, result: @escaping FlutterResult)
     {
 
@@ -67,8 +84,9 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
     func startFreeDrive(arguments: NSDictionary?, result: @escaping FlutterResult)
     {
         let freeDriveViewController = FreeDriveViewController()
-        let flutterViewController = UIApplication.shared.delegate?.window??.rootViewController as! FlutterViewController
-        flutterViewController.present(freeDriveViewController, animated: true, completion: nil)
+        if let topVC = getTopViewController() {
+            topVC.present(freeDriveViewController, animated: true, completion: nil)
+        }
     }
     
     func startNavigation(arguments: NSDictionary?, result: @escaping FlutterResult)
@@ -132,12 +150,27 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
                     strongSelf._routes = routes
                     let routeOptionsView = RouteOptionsViewController(routes: routes, options: strongSelf._options!)
                     
-                    let flutterViewController = UIApplication.shared.delegate?.window??.rootViewController as! FlutterViewController
-                    flutterViewController.present(routeOptionsView, animated: true, completion: nil)
+                    if let topVC = strongSelf.getTopViewController() {
+                        topVC.present(routeOptionsView, animated: true, completion: nil)
+                    }
                 }
                 else
                 {
-                    let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: strongSelf._options!, simulating: simulationMode)
+                    let navLocationManager = strongSelf._simulateRoute ? SimulatedLocationManager(route: response.routes!.first!) : NavigationLocationManager()
+                    if let navLocManager = navLocationManager as? NavigationLocationManager {
+                        navLocManager.distanceFilter = 1.5
+                        navLocManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+                        navLocManager.activityType = .automotiveNavigation
+                        navLocManager.headingFilter = 3.0
+                        navLocManager.pausesLocationUpdatesAutomatically = false
+                    }
+                    let navigationService = MapboxNavigationService(
+                        routeResponse: response,
+                        routeIndex: 0,
+                        routeOptions: strongSelf._options!,
+                        locationSource: navLocationManager,
+                        simulating: simulationMode
+                    )
                     var dayStyle = CustomDayStyle()
                     if(strongSelf._mapStyleUrlDay != nil){
                         dayStyle = CustomDayStyle(url: strongSelf._mapStyleUrlDay)
@@ -177,8 +210,9 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
             self._navigationViewController!.showsReportFeedback = _showReportFeedbackButton
             self._navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
         }
-        let flutterViewController = UIApplication.shared.delegate?.window??.rootViewController as! FlutterViewController
-        flutterViewController.present(self._navigationViewController!, animated: true, completion: nil)
+        if let topVC = getTopViewController() {
+            topVC.present(self._navigationViewController!, animated: true, completion: nil)
+        }
     }
     
     func setNavigationOptions(wayPoints: [Waypoint]) {

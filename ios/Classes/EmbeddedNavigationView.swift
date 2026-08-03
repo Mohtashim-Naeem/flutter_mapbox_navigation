@@ -82,7 +82,11 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             }
             else if(call.method == "reCenter"){
                 //used to recenter map from user action during navigation
-                strongSelf.navigationMapView.navigationCamera.follow()
+                if let navMapView = strongSelf._navigationViewController?.navigationMapView {
+                    navMapView.navigationCamera.follow()
+                } else {
+                    strongSelf.navigationMapView.navigationCamera.follow()
+                }
             }
             else
             {
@@ -109,6 +113,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
     {
         navigationMapView = NavigationMapView(frame: frame)
         navigationMapView.delegate = self
+        navigationMapView.mapView.presentsWithTransaction = true
 
         if(self.arguments != nil)
         {
@@ -123,6 +128,11 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             var currentLocation: CLLocation!
 
             locationManager.requestWhenInUseAuthorization()
+            locationManager.distanceFilter = 1.5
+            locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+            locationManager.activityType = .automotiveNavigation
+            locationManager.headingFilter = 3.0
+            locationManager.pausesLocationUpdatesAutomatically = false
 
             if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
                 CLLocationManager.authorizationStatus() == .authorizedAlways) {
@@ -273,13 +283,20 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
     func startEmbeddedNavigation(arguments: NSDictionary?, result: @escaping FlutterResult) {
         guard let response = self.routeResponse else { return }
         let navLocationManager = self._simulateRoute ? SimulatedLocationManager(route: response.routes!.first!) : NavigationLocationManager()
+        if let navLocManager = navLocationManager as? NavigationLocationManager {
+            navLocManager.distanceFilter = 1.5
+            navLocManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+            navLocManager.activityType = .automotiveNavigation
+            navLocManager.headingFilter = 3.0
+            navLocManager.pausesLocationUpdatesAutomatically = false
+        }
         navigationService = MapboxNavigationService(routeResponse: response,
                                                             routeIndex: selectedRouteIndex,
                                                             routeOptions: routeOptions!,
                                                             routingProvider: MapboxRoutingProvider(.hybrid),
                                                             credentials: NavigationSettings.shared.directions.credentials,
                                                             locationSource: navLocationManager,
-                                                    simulating: self._simulateRoute ? .always : .onPoorGPS)
+                                                    simulating: self._simulateRoute ? .always : .never)
         navigationService.delegate = self
 
         var dayStyle = CustomDayStyle()
@@ -300,17 +317,22 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
         _navigationViewController = NavigationViewController(for: response, routeIndex: selectedRouteIndex, routeOptions: routeOptions!, navigationOptions: navigationOptions)
         _navigationViewController!.delegate = self
+        _navigationViewController!.navigationMapView?.mapView.presentsWithTransaction = true
 
         _navigationViewController!.showsReportFeedback = _showReportFeedbackButton
         _navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
 
-        let flutterViewController = UIApplication.shared.delegate?.window?!.rootViewController as! FlutterViewController
-        flutterViewController.addChild(_navigationViewController!)
-
-        self.navigationMapView.addSubview(_navigationViewController!.view)
-        _navigationViewController!.view.translatesAutoresizingMaskIntoConstraints = false
-        constraintsWithPaddingBetween(holderView: self.navigationMapView, topView: _navigationViewController!.view, padding: 0.0)
-        flutterViewController.didMove(toParent: flutterViewController)
+        if let parentVC = getTopViewController() {
+            parentVC.addChild(_navigationViewController!)
+            self.navigationMapView.addSubview(_navigationViewController!.view)
+            _navigationViewController!.view.translatesAutoresizingMaskIntoConstraints = false
+            constraintsWithPaddingBetween(holderView: self.navigationMapView, topView: _navigationViewController!.view, padding: 0.0)
+            _navigationViewController!.didMove(toParent: parentVC)
+        } else {
+            self.navigationMapView.addSubview(_navigationViewController!.view)
+            _navigationViewController!.view.translatesAutoresizingMaskIntoConstraints = false
+            constraintsWithPaddingBetween(holderView: self.navigationMapView, topView: _navigationViewController!.view, padding: 0.0)
+        }
         result(true)
 
     }
