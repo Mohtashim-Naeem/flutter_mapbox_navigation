@@ -120,6 +120,9 @@ open class TurnByTurn(
             .distanceFormatterOptions(distanceFormatterOptions)
             .build()
 
+        if (MapboxNavigationApp.isSetup()) {
+            MapboxNavigationApp.disable()
+        }
         MapboxNavigationApp
             .setup(navigationOptions)
             .attach(this.activity as LifecycleOwner)
@@ -531,7 +534,7 @@ open class TurnByTurn(
     private var mapStyleUrlDay: String? = null
     private var mapStyleUrlNight: String? = null
     private var navigationLanguage = "en"
-    private var navigationVoiceUnits = DirectionsCriteria.METRIC
+    private var navigationVoiceUnits = DirectionsCriteria.IMPERIAL
     private var zoom = 15.0
     private var bearing = 0.0
     private var tilt = 0.0

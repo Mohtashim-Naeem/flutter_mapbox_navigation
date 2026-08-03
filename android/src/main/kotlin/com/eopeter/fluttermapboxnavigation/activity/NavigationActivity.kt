@@ -19,6 +19,7 @@ import com.eopeter.fluttermapboxnavigation.models.WaypointSet
 import com.eopeter.fluttermapboxnavigation.utilities.CustomInfoPanelEndNavButtonBinder
 import com.eopeter.fluttermapboxnavigation.utilities.PluginUtilities
 import com.google.gson.Gson
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -29,6 +30,8 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -91,10 +94,21 @@ class NavigationActivity : AppCompatActivity() {
         accessToken =
             PluginUtilities.getResourceFromContext(this.applicationContext, "mapbox_access_token")
 
-        val navigationOptions = NavigationOptions.Builder(this.applicationContext)
-            .accessToken(accessToken)
+        val locale = PluginUtilities.getLocaleFromCode(FlutterMapboxNavigationPlugin.navigationLanguage)
+        val unitType = if (FlutterMapboxNavigationPlugin.navigationVoiceUnits == DirectionsCriteria.IMPERIAL) UnitType.IMPERIAL else UnitType.METRIC
+        val distanceFormatterOptions = DistanceFormatterOptions.Builder(this.applicationContext)
+            .locale(locale)
+            .unitType(unitType)
             .build()
 
+        val navigationOptions = NavigationOptions.Builder(this.applicationContext)
+            .accessToken(accessToken)
+            .distanceFormatterOptions(distanceFormatterOptions)
+            .build()
+
+        if (MapboxNavigationApp.isSetup()) {
+            MapboxNavigationApp.disable()
+        }
         MapboxNavigationApp
             .setup(navigationOptions)
             .attach(this)
