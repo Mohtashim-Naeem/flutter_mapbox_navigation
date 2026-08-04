@@ -10,12 +10,40 @@
     </style>
 
     <style name="EpicTripProgressStyleLight" parent="MapboxStyleTripProgressView">
-        <item name="tripProgressViewBackgroundColor">@color/epic_panel_bg_light</item>
-        <item name="tripProgressTextColor">@color/epic_panel_text_light</item>
+        <item name="tripProgressViewBackgroundColor">@color/epic_surface_light</item>
+        <item name="tripProgressTextColor">@color/epic_text_primary_light</item>
     </style>
 
     <style name="EpicTripProgressStyleDark" parent="MapboxStyleTripProgressView">
-        <item name="tripProgressViewBackgroundColor">@color/epic_banner_bg_dark</item>
-        <item name="tripProgressTextColor">@color/epic_panel_text_dark</item>
+        <item name="tripProgressViewBackgroundColor">@color/epic_surface_dark</item>
+        <item name="tripProgressTextColor">@color/epic_accent</item>
+    </style>
+
+    <style name="EpicManeuverTextAppearanceLight" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_light</item>
+    </style>
+
+    <style name="EpicManeuverTextAppearanceDark" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
+    </style>
+
+    <style name="EpicManeuverIconStyleLight" parent="MapboxStyleTurnIconManeuver">
+        <item name="android:tint">@color/epic_text_primary_light</item>
+        <item name="iconTint">@color/epic_text_primary_light</item>
+    </style>
+
+    <style name="EpicManeuverIconStyleDark" parent="MapboxStyleTurnIconManeuver">
+        <item name="android:tint">@color/epic_text_primary_dark</item>
+        <item name="iconTint">@color/epic_text_primary_dark</item>
+    </style>
+
+    <style name="EpicManeuverStyleLight" parent="MapboxStyleManeuverView">
+        <item name="maneuverViewBackgroundColor">@color/epic_maneuver_bg_light</item>
+        <item name="maneuverViewIconStyle">@style/EpicManeuverIconStyleLight</item>
+    </style>
+
+    <style name="EpicManeuverStyleDark" parent="MapboxStyleManeuverView">
+        <item name="maneuverViewBackgroundColor">@color/epic_maneuver_bg_dark</item>
+        <item name="maneuverViewIconStyle">@style/EpicManeuverIconStyleDark</item>
     </style>
 </resources>

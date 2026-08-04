@@ -38,6 +38,11 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
+import androidx.core.content.ContextCompat
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -169,11 +174,41 @@ class NavigationActivity : AppCompatActivity() {
                      styleUrlDay?.lowercase()?.contains("dark") == true
         val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
         val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
+        val maneuverStyle = if (isDark) R.style.EpicManeuverStyleDark else R.style.EpicManeuverStyleLight
 
         // set map style
         binding.navigationView.customizeViewStyles {
             infoPanelBackground = panelBgDrawable
             tripProgressStyle = progressStyle
+            maneuverViewOptions = ManeuverViewOptions.Builder()
+                .maneuverBackgroundColor(
+                    if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                )
+                .subManeuverBackgroundColor(
+                    if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                )
+                .upcomingManeuverBackgroundColor(
+                    if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                )
+                .primaryManeuverOptions(
+                    ManeuverPrimaryOptions.Builder()
+                        .textAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                        .build()
+                )
+                .secondaryManeuverOptions(
+                    ManeuverSecondaryOptions.Builder()
+                        .textAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                        .build()
+                )
+                .subManeuverOptions(
+                    ManeuverSubOptions.Builder()
+                        .textAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                        .build()
+                )
+                .stepDistanceTextAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                .turnIconManeuver(if (isDark) R.style.EpicManeuverIconStyleDark else R.style.EpicManeuverIconStyleLight)
+                .laneGuidanceTurnIconManeuver(if (isDark) R.style.EpicManeuverIconStyleDark else R.style.EpicManeuverIconStyleLight)
+                .build()
         }
 
         // set map style

@@ -32,13 +32,22 @@ class CustomNightStyle: NightStyle {
 
     override func apply() {
         super.apply()
-        let darkBg = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
+        let darkSurface = UIColor(red: 16.0 / 255.0, green: 43.0 / 255.0, blue: 13.0 / 255.0, alpha: 1.0)
+        let maneuverBg = UIColor(red: 18.0 / 255.0, green: 31.0 / 255.0, blue: 17.0 / 255.0, alpha: 1.0)
         let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
+        let textPrimary = UIColor(red: 255.0 / 255.0, green: 255.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0)
 
-        BottomBannerView.appearance().backgroundColor = darkBg
-        BottomPaddingView.appearance().backgroundColor = darkBg
+        TopBannerView.appearance().backgroundColor = maneuverBg
+        BottomBannerView.appearance().backgroundColor = darkSurface
+        BottomPaddingView.appearance().backgroundColor = darkSurface
         TimeRemainingLabel.appearance().textColor = brandGreen
-        DistanceRemainingLabel.appearance().textColor = brandGreen
-        DateLabel.appearance().textColor = brandGreen
+        DistanceRemainingLabel.appearance().textColor = textPrimary
+        DateLabel.appearance().textColor = textPrimary
+        
+        PrimaryLabel.appearance().textColor = textPrimary
+        SecondaryLabel.appearance().textColor = textPrimary
+        
+        ManeuverView.appearance().primaryColor = textPrimary
+        ManeuverView.appearance().secondaryColor = textPrimary
     }
 }

@@ -38,6 +38,10 @@ import com.mapbox.navigation.core.trip.session.*
 import com.mapbox.navigation.ui.base.lifecycle.UIBinder
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
+import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
+import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -413,10 +417,52 @@ open class TurnByTurn(
 
         val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
         val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
+        val maneuverStyle = if (isDark) R.style.EpicManeuverStyleDark else R.style.EpicManeuverStyleLight
 
-        this@TurnByTurn.binding.navigationView.customizeViewStyles {
-            infoPanelBackground = panelBgDrawable
-            tripProgressStyle = progressStyle
+        val context = this@TurnByTurn.activity
+        if (context != null) {
+            this@TurnByTurn.binding.navigationView.customizeViewStyles {
+                infoPanelBackground = panelBgDrawable
+                tripProgressStyle = progressStyle
+                maneuverViewOptions = ManeuverViewOptions.Builder()
+                    .maneuverBackgroundColor(
+                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                    )
+                    .subManeuverBackgroundColor(
+                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                    )
+                    .upcomingManeuverBackgroundColor(
+                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                    )
+                    .primaryManeuverOptions(
+                        ManeuverPrimaryOptions.Builder()
+                            .textAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                            .build()
+                    )
+                    .secondaryManeuverOptions(
+                        ManeuverSecondaryOptions.Builder()
+                            .textAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                            .build()
+                    )
+                    .subManeuverOptions(
+                        ManeuverSubOptions.Builder()
+                            .textAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                            .build()
+                    )
+                    .turnIconManeuver(
+                         if (isDark) R.style.EpicManeuverIconStyleDark else R.style.EpicManeuverIconStyleLight
+                    )
+                    .laneGuidanceTurnIconManeuver(
+                         if (isDark) R.style.EpicManeuverIconStyleDark else R.style.EpicManeuverIconStyleLight
+                    )
+                    .stepDistanceTextAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
+                    .build()
+            }
+        } else {
+            this@TurnByTurn.binding.navigationView.customizeViewStyles {
+                infoPanelBackground = panelBgDrawable
+                tripProgressStyle = progressStyle
+            }
         }
 
         this.initialLatitude = arguments["initialLatitude"] as? Double

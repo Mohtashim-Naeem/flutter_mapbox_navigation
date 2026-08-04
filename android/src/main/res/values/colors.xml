@@ -7,12 +7,23 @@
     <color name="red">#FF0000</color>
     <color name="white">#FFFFFF</color>
 
-    <!-- Maneuver banner — matches Flutter AppColors surfaces -->
-    <color name="epic_banner_bg_dark">#0B2700</color>
-    <color name="epic_banner_sub_bg_dark">#0B2700</color>
-    <color name="epic_maneuver_bg_light">#F7F8F7</color>
-    <color name="epic_maneuver_sub_bg_light">#F2F3F2</color>
-    <color name="epic_panel_bg_light">#FFFFFF</color>
-    <color name="epic_panel_text_dark">#61CB08</color>
-    <color name="epic_panel_text_light">#0F1210</color>
+    <!-- Automotive Navigation UI Palette -->
+    <!-- Light Theme -->
+    <color name="epic_bg_light">#F7F8F7</color>
+    <color name="epic_surface_light">#FFFFFF</color>
+    <color name="epic_maneuver_bg_light">#F9FAF9</color>
+    <color name="epic_text_primary_light">#0F1210</color>
+    <color name="epic_text_secondary_light">#61CB08</color>
+    <color name="epic_border_light">#D8E6DE</color>
+
+    <!-- Dark Theme -->
+    <color name="epic_bg_dark">#081A05</color>
+    <color name="epic_surface_dark">#183814</color>
+    <color name="epic_maneuver_bg_dark">#1F331D</color>
+    <color name="epic_text_primary_dark">#FFFFFF</color>
+    <color name="epic_text_secondary_dark">#C7D2C7</color>
+    <color name="epic_border_dark">#26402A</color>
+
+    <!-- Shared Accent -->
+    <color name="epic_accent">#61CB08</color>
 </resources>
