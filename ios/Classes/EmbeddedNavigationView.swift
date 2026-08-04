@@ -166,16 +166,19 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
     func clearRoute(arguments: NSDictionary?, result: @escaping FlutterResult)
     {
-        if routeResponse == nil
-        {
-            return
-        }
         if (navigationService != nil) {
             navigationService.stop()
         }
         navigationMapView.removeRoutes()
+        _navigationViewController?.navigationMapView?.removeRoutes()
+        if (_navigationViewController != nil) {
+            _navigationViewController?.view.removeFromSuperview()
+            _navigationViewController?.removeFromParent()
+            _navigationViewController = nil
+        }
         routeResponse = nil
         sendEvent(eventType: MapBoxEventType.navigation_cancelled)
+        result(true)
     }
 
     func buildRoute(arguments: NSDictionary?, flutterResult: @escaping FlutterResult)
@@ -274,7 +277,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         navigationMapView.userLocationStyle = .puck2D()
 
         let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView)
-        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
+        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = true
         navigationViewportDataSource.followingMobileCamera.zoom = _zoom
         navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
         result(true)
@@ -282,6 +285,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
     func startEmbeddedNavigation(arguments: NSDictionary?, result: @escaping FlutterResult) {
         guard let response = self.routeResponse else { return }
+        self.navigationMapView.removeRoutes()
+        self.navigationMapView.removeWaypoints()
         let navLocationManager = self._simulateRoute ? SimulatedLocationManager(route: response.routes!.first!) : NavigationLocationManager()
         if let navLocManager = navLocationManager as? NavigationLocationManager {
             navLocManager.distanceFilter = 1.5
@@ -354,8 +359,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
     }
 
     func moveCameraToCoordinates(latitude: Double, longitude: Double) {
-        let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
-        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
+        let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView)
+        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = true
         navigationViewportDataSource.followingMobileCamera.center = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         navigationViewportDataSource.followingMobileCamera.zoom = _zoom
         navigationViewportDataSource.followingMobileCamera.bearing = _bearing
@@ -372,8 +377,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             duration = 0.0
         }
 
-        let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
-        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
+        let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView)
+        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = true
         navigationViewportDataSource.followingMobileCamera.zoom = 13.0
         navigationViewportDataSource.followingMobileCamera.pitch = 15
         navigationViewportDataSource.followingMobileCamera.padding = .zero
@@ -433,8 +438,10 @@ extension FlutterMapboxNavigationView : NavigationMapViewDelegate {
     }
 
     public func mapViewDidFinishLoadingMap(_ mapView: NavigationMapView) {
-        // Wait for the map to load before initiating the first camera movement.
-        moveCameraToCenter()
+        // Only move camera to center on initial map load if navigation has not started
+        if (routeResponse == nil && _navigationViewController == nil) {
+            moveCameraToCenter()
+        }
     }
 
 }
