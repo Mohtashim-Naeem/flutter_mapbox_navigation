@@ -42,6 +42,13 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import android.graphics.Color
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -209,14 +216,37 @@ class NavigationActivity : AppCompatActivity() {
                 .turnIconManeuver(if (isDark) R.style.EpicManeuverIconStyleDark else R.style.EpicManeuverIconStyleLight)
                 .laneGuidanceTurnIconManeuver(if (isDark) R.style.EpicManeuverIconStyleDark else R.style.EpicManeuverIconStyleLight)
                 .build()
+                
+            destinationMarkerAnnotationOptions = PointAnnotationOptions()
+                .withIconColor("#61CB08")
         }
 
-        // set map style
+        // set map style and route line color
         binding.navigationView.customizeViewOptions {
             mapStyleUriDay = styleUrlDay
             mapStyleUriNight = styleUrlNight
+            
+            routeLineOptions = MapboxRouteLineOptions.Builder(this@NavigationActivity)
+                .withRouteLineResources(
+                    RouteLineResources.Builder()
+                        .routeLineColorResources(
+                            RouteLineColorResources.Builder()
+                                .routeDefaultColor(ContextCompat.getColor(this@NavigationActivity, R.color.epic_accent))
+                                .routeCasingColor(ContextCompat.getColor(this@NavigationActivity, R.color.epic_border_dark))
+                                .routeUnknownCongestionColor(ContextCompat.getColor(this@NavigationActivity, R.color.epic_accent))
+                                .routeLowCongestionColor(ContextCompat.getColor(this@NavigationActivity, R.color.epic_accent))
+                                .build()
+                        )
+                        .build()
+                )
+                .build()
+            
+            routeArrowOptions = com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder(this@NavigationActivity)
+                .withAboveLayerId(com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                .withArrowColor(android.graphics.Color.WHITE)
+                .withArrowCasingColor(ContextCompat.getColor(this@NavigationActivity, R.color.epic_accent))
+                .build()
         }
-
         if (FlutterMapboxNavigationPlugin.enableFreeDriveMode) {
             binding.navigationView.api.routeReplayEnabled(FlutterMapboxNavigationPlugin.simulateRoute)
             binding.navigationView.api.startFreeDrive()

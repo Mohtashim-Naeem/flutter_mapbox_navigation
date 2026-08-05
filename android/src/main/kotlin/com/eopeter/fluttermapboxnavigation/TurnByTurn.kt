@@ -41,6 +41,13 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverViewOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverPrimaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSecondaryOptions
 import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import android.graphics.Color
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.ui.tripprogress.model.TripProgressViewOptions
 import io.flutter.plugin.common.EventChannel
@@ -407,6 +414,30 @@ open class TurnByTurn(
         this@TurnByTurn.binding.navigationView.customizeViewOptions {
             mapStyleUriDay = this@TurnByTurn.mapStyleUrlDay
             mapStyleUriNight = this@TurnByTurn.mapStyleUrlNight
+            
+            val ctx = this@TurnByTurn.activity
+            if (ctx != null) {
+                routeLineOptions = MapboxRouteLineOptions.Builder(ctx)
+                    .withRouteLineResources(
+                        RouteLineResources.Builder()
+                            .routeLineColorResources(
+                                RouteLineColorResources.Builder()
+                                    .routeDefaultColor(ContextCompat.getColor(ctx, R.color.epic_accent))
+                                    .routeCasingColor(ContextCompat.getColor(ctx, R.color.epic_border_dark))
+                                    .routeUnknownCongestionColor(ContextCompat.getColor(ctx, R.color.epic_accent))
+                                    .routeLowCongestionColor(ContextCompat.getColor(ctx, R.color.epic_accent))
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+                
+                routeArrowOptions = com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder(ctx)
+                    .withAboveLayerId(com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                    .withArrowColor(android.graphics.Color.WHITE)
+                    .withArrowCasingColor(ContextCompat.getColor(ctx, R.color.epic_accent))
+                    .build()
+            }
         }
 
         // Detect dark mode: if day and night styles are identical, the Flutter side
@@ -426,13 +457,13 @@ open class TurnByTurn(
                 tripProgressStyle = progressStyle
                 maneuverViewOptions = ManeuverViewOptions.Builder()
                     .maneuverBackgroundColor(
-                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_upcoming
                     )
                     .subManeuverBackgroundColor(
-                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                        if (isDark) R.color.epic_upcoming else R.color.epic_upcoming
                     )
                     .upcomingManeuverBackgroundColor(
-                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
+                        if (isDark) R.color.epic_upcoming else R.color.epic_upcoming
                     )
                     .primaryManeuverOptions(
                         ManeuverPrimaryOptions.Builder()
@@ -457,6 +488,9 @@ open class TurnByTurn(
                     )
                     .stepDistanceTextAppearance(if (isDark) R.style.EpicManeuverTextAppearanceDark else R.style.EpicManeuverTextAppearanceLight)
                     .build()
+                    
+                destinationMarkerAnnotationOptions = PointAnnotationOptions()
+                    .withIconColor("#61CB08")
             }
         } else {
             this@TurnByTurn.binding.navigationView.customizeViewStyles {

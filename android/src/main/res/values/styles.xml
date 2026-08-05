@@ -9,14 +9,30 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="EpicTripProgressSubTextLight" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_light</item>
+    </style>
+
+    <style name="EpicTripProgressSubTextDark" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_accent</item>
+    </style>
+
     <style name="EpicTripProgressStyleLight" parent="MapboxStyleTripProgressView">
         <item name="tripProgressViewBackgroundColor">@color/epic_surface_light</item>
         <item name="tripProgressTextColor">@color/epic_text_primary_light</item>
+        <item name="distanceRemainingTextAppearance">@style/EpicTripProgressSubTextLight</item>
+        <item name="estimatedArrivalTimeTextAppearance">@style/EpicTripProgressSubTextLight</item>
+        <item name="distanceRemainingIconTint">@color/epic_text_primary_light</item>
+        <item name="estimatedArrivalTimeIconTint">@color/epic_text_primary_light</item>
     </style>
 
     <style name="EpicTripProgressStyleDark" parent="MapboxStyleTripProgressView">
         <item name="tripProgressViewBackgroundColor">@color/epic_surface_dark</item>
         <item name="tripProgressTextColor">@color/epic_accent</item>
+        <item name="distanceRemainingTextAppearance">@style/EpicTripProgressSubTextDark</item>
+        <item name="estimatedArrivalTimeTextAppearance">@style/EpicTripProgressSubTextDark</item>
+        <item name="distanceRemainingIconTint">@color/epic_accent</item>
+        <item name="estimatedArrivalTimeIconTint">@color/epic_accent</item>
     </style>
 
     <style name="EpicManeuverTextAppearanceLight" parent="TextAppearance.AppCompat">
@@ -27,15 +43,6 @@
         <item name="android:textColor">@color/epic_text_primary_dark</item>
     </style>
 
-    <style name="EpicManeuverIconStyleLight" parent="MapboxStyleTurnIconManeuver">
-        <item name="android:tint">@color/epic_text_primary_light</item>
-        <item name="iconTint">@color/epic_text_primary_light</item>
-    </style>
-
-    <style name="EpicManeuverIconStyleDark" parent="MapboxStyleTurnIconManeuver">
-        <item name="android:tint">@color/epic_text_primary_dark</item>
-        <item name="iconTint">@color/epic_text_primary_dark</item>
-    </style>
 
     <style name="EpicManeuverStyleLight" parent="MapboxStyleManeuverView">
         <item name="maneuverViewBackgroundColor">@color/epic_maneuver_bg_light</item>
@@ -46,4 +53,24 @@
         <item name="maneuverViewBackgroundColor">@color/epic_maneuver_bg_dark</item>
         <item name="maneuverViewIconStyle">@style/EpicManeuverIconStyleDark</item>
     </style>
+
+
+    <!-- <style name="EpicManeuverIconStyleLight" parent="MapboxStyleTurnIconManeuver">
+        <item name="android:tint">@color/epic_text_primary_light</item>
+        <item name="iconTint">@color/epic_text_primary_light</item>
+    </style>
+
+    <style name="EpicManeuverIconStyleDark" parent="MapboxStyleTurnIconManeuver">
+        <item name="android:tint">@color/epic_text_primary_dark</item>
+        <item name="iconTint">@color/epic_text_primary_dark</item>
+    </style> -->
+    <style name="EpicManeuverIconStyleLight" parent="MapboxStyleTurnIconManeuver">
+    <item name="maneuverTurnIconColor">@color/epic_text_primary_light</item>
+    <item name="maneuverTurnIconShadowColor">@android:color/transparent</item>
+</style>
+
+<style name="EpicManeuverIconStyleDark" parent="MapboxStyleTurnIconManeuver">
+    <item name="maneuverTurnIconColor">@color/epic_text_primary_dark</item>
+    <item name="maneuverTurnIconShadowColor">@android:color/transparent</item>
+</style>
 </resources>

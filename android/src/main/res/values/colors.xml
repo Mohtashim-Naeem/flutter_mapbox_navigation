@@ -19,10 +19,11 @@
     <!-- Dark Theme -->
     <color name="epic_bg_dark">#081A05</color>
     <color name="epic_surface_dark">#183814</color>
-    <color name="epic_maneuver_bg_dark">#1F331D</color>
+    <color name="epic_maneuver_bg_dark">#0B2700</color>
     <color name="epic_text_primary_dark">#FFFFFF</color>
     <color name="epic_text_secondary_dark">#C7D2C7</color>
     <color name="epic_border_dark">#26402A</color>
+    <color name="epic_upcoming">#1C5311</color>
 
     <!-- Shared Accent -->
     <color name="epic_accent">#61CB08</color>
