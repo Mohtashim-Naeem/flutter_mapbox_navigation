@@ -11,10 +11,12 @@
     <!-- Light Theme -->
     <color name="epic_bg_light">#F7F8F7</color>
     <color name="epic_surface_light">#FFFFFF</color>
-    <color name="epic_maneuver_bg_light">#F9FAF9</color>
-    <color name="epic_text_primary_light">#0F1210</color>
+    <color name="epic_maneuver_bg_light">#EAF3DE</color>
+    <color name="epic_text_primary_light">#173404</color>
     <color name="epic_text_secondary_light">#61CB08</color>
     <color name="epic_border_light">#D8E6DE</color>
+    <color name="epic_maneuver_icon_light">#27500A</color>
+    <color name="epic_accent_secondary_light">#639922</color>
 
     <!-- Dark Theme -->
     <color name="epic_bg_dark">#081A05</color>

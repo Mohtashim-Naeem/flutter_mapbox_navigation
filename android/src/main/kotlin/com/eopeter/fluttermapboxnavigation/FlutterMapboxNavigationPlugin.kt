@@ -54,6 +54,7 @@ class FlutterMapboxNavigationPlugin : FlutterPlugin, MethodCallHandler, Activity
         var enableFreeDriveMode = false
         var mapStyleUrlDay: String? = null
         var mapStyleUrlNight: String? = null
+        var isDarkTheme: Boolean? = null
         var navigationLanguage = "en"
         var navigationVoiceUnits = DirectionsCriteria.IMPERIAL
         var voiceInstructionsEnabled = true
@@ -169,6 +170,7 @@ class FlutterMapboxNavigationPlugin : FlutterPlugin, MethodCallHandler, Activity
 
         mapStyleUrlDay = arguments?.get("mapStyleUrlDay") as? String
         mapStyleUrlNight = arguments?.get("mapStyleUrlNight") as? String
+        isDarkTheme = arguments?.get("isDarkTheme") as? Boolean
 
         val longPress = arguments?.get("longPressDestinationEnabled") as? Boolean
         if (longPress != null) {

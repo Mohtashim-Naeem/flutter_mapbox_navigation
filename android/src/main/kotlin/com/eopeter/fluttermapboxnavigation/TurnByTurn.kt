@@ -366,6 +366,7 @@ open class TurnByTurn(
     }
 
     open fun setOptions(arguments: Map<*, *>) {
+        Log.d("TurnByTurn", "setOptions args keys: ${arguments.keys}, isDarkThemeOverride=$isDarkThemeOverride")
         val navMode = arguments["mode"] as? String
         if (navMode != null) {
             when (navMode) {
@@ -440,11 +441,14 @@ open class TurnByTurn(
             }
         }
 
-        // Detect dark mode: if day and night styles are identical, the Flutter side
-        // passed the same (dark) style for both slots. Also catch explicit "dark" keyword.
-        val isDark = (this.mapStyleUrlDay == this.mapStyleUrlNight &&
+        // Detect dark mode: explicitly passed from Flutter, or fallback to map style heuristic
+        val passedIsDark = arguments["isDarkTheme"] as? Boolean
+        if (passedIsDark != null) {
+            this.isDarkThemeOverride = passedIsDark
+        }
+        val isDark = this.isDarkThemeOverride ?: ((this.mapStyleUrlDay == this.mapStyleUrlNight &&
                       this.mapStyleUrlDay != Style.MAPBOX_STREETS) ||
-                     this.mapStyleUrlDay?.lowercase()?.contains("dark") == true
+                     this.mapStyleUrlDay?.lowercase()?.contains("dark") == true)
 
         val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
         val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
@@ -457,13 +461,13 @@ open class TurnByTurn(
                 tripProgressStyle = progressStyle
                 maneuverViewOptions = ManeuverViewOptions.Builder()
                     .maneuverBackgroundColor(
-                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_upcoming
+                        if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light   
                     )
                     .subManeuverBackgroundColor(
-                        if (isDark) R.color.epic_upcoming else R.color.epic_upcoming
+                        if (isDark) R.color.epic_upcoming else R.color.epic_surface_light
                     )
                     .upcomingManeuverBackgroundColor(
-                        if (isDark) R.color.epic_upcoming else R.color.epic_upcoming
+                        if (isDark) R.color.epic_upcoming else R.color.epic_surface_light
                     )
                     .primaryManeuverOptions(
                         ManeuverPrimaryOptions.Builder()
@@ -599,6 +603,7 @@ open class TurnByTurn(
     var simulateRoute = false
     private var mapStyleUrlDay: String? = null
     private var mapStyleUrlNight: String? = null
+    private var isDarkThemeOverride: Boolean? = null
     private var navigationLanguage = "en"
     private var navigationVoiceUnits = DirectionsCriteria.IMPERIAL
     private var zoom = 15.0

@@ -35,6 +35,7 @@ class MapBoxOptions {
     this.showReportFeedbackButton = true,
     this.showEndOfRouteFeedback = true,
     this.enableOnMapTapCallback = false,
+    this.isDarkTheme,
   });
 
   MapBoxOptions.from(MapBoxOptions option) {
@@ -60,6 +61,7 @@ class MapBoxOptions {
     animateBuildRoute = option.animateBuildRoute;
     showReportFeedbackButton = option.showReportFeedbackButton;
     showEndOfRouteFeedback = option.showEndOfRouteFeedback;
+    isDarkTheme = option.isDarkTheme;
   }
 
   /// The initial Latitude of the Map View
@@ -168,6 +170,9 @@ class MapBoxOptions {
   /// to where you tap on the map.
   bool? enableOnMapTapCallback;
 
+  /// Explicitly tell the native side whether to use the dark theme for UI components
+  bool? isDarkTheme;
+
   Map<String, dynamic> toMap() {
     final optionsMap = <String, dynamic>{};
     void addIfNonNull(String fieldName, dynamic value) {
@@ -225,6 +230,7 @@ class MapBoxOptions {
     addIfNonNull('showReportFeedbackButton', showReportFeedbackButton);
     addIfNonNull('showEndOfRouteFeedback', showEndOfRouteFeedback);
     addIfNonNull('enableOnMapTapCallback', enableOnMapTapCallback);
+    addIfNonNull('isDarkTheme', isDarkTheme);
 
     return optionsMap;
   }

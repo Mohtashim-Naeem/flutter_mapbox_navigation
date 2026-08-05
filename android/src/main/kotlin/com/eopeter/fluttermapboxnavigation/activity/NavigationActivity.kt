@@ -177,8 +177,9 @@ class NavigationActivity : AppCompatActivity() {
 
         if (styleUrlDay == null) styleUrlDay = Style.MAPBOX_STREETS
         if (styleUrlNight == null) styleUrlNight = Style.DARK
-        val isDark = (styleUrlDay == styleUrlNight && styleUrlDay != Style.MAPBOX_STREETS) ||
-                     styleUrlDay?.lowercase()?.contains("dark") == true
+        val passedIsDark = FlutterMapboxNavigationPlugin.isDarkTheme
+        val isDark = passedIsDark ?: ((styleUrlDay == styleUrlNight && styleUrlDay != Style.MAPBOX_STREETS) ||
+                     styleUrlDay?.lowercase()?.contains("dark") == true)
         val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
         val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
         val maneuverStyle = if (isDark) R.style.EpicManeuverStyleDark else R.style.EpicManeuverStyleLight
