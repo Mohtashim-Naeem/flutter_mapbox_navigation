@@ -101,14 +101,14 @@
     </style>
 
     <style name="EpicCameraButtonStyleLight" parent="DropInStyleCameraModeButton">
-        <item name="backgroundTint">@color/epic_accent</item>
-        <item name="android:backgroundTint">@color/epic_accent</item>
+        <item name="backgroundTint">@color/epic_maneuver_bg_light</item>
+        <item name="android:backgroundTint">@color/epic_maneuver_bg_light</item>
         <item name="cardBackgroundColor">@color/epic_maneuver_bg_light</item>
-        <item name="iconTint">@color/epic_accent</item>
-        <item name="android:iconTint">@color/epic_accent</item>
-        <item name="android:tint">@color/epic_accent</item>
-        <item name="tint">@color/epic_accent</item>
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="iconTint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:iconTint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:tint">@color/epic_maneuver_bg_dark</item>
+        <item name="tint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:textColor">@color/epic_maneuver_bg_dark</item>
     </style>
 
     <!-- Audio Guidance Button (mute/unmute) -->
@@ -124,14 +124,14 @@
     </style>
 
     <style name="EpicAudioButtonStyleLight" parent="DropInStyleAudioGuidanceButton">
-        <item name="backgroundTint">@color/epic_accent</item>
-        <item name="android:backgroundTint">@color/epic_accent</item>
+        <item name="backgroundTint">@color/epic_maneuver_bg_light</item>
+        <item name="android:backgroundTint">@color/epic_maneuver_bg_light</item>
         <item name="cardBackgroundColor">@color/epic_maneuver_bg_light</item>
-        <item name="iconTint">@color/epic_accent</item>
-        <item name="android:iconTint">@color/epic_accent</item>
-        <item name="android:tint">@color/epic_accent</item>
-        <item name="tint">@color/epic_accent</item>
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="iconTint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:iconTint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:tint">@color/epic_maneuver_bg_dark</item>
+        <item name="tint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:textColor">@color/epic_maneuver_bg_dark</item>
     </style>
 
     <!-- Recenter Button (location target/crosshair) -->
@@ -147,13 +147,13 @@
     </style>
 
     <style name="EpicRecenterButtonStyleLight" parent="DropInStyleRecenterButton">
-        <item name="backgroundTint">@color/epic_accent</item>
-        <item name="android:backgroundTint">@color/epic_accent</item>
+        <item name="backgroundTint">@color/epic_maneuver_bg_light</item>
+        <item name="android:backgroundTint">@color/epic_maneuver_bg_light</item>
         <item name="cardBackgroundColor">@color/epic_maneuver_bg_light</item>
-        <item name="iconTint">@color/epic_accent</item>
-        <item name="android:iconTint">@color/epic_accent</item>
-        <item name="android:tint">@color/epic_accent</item>
-        <item name="tint">@color/epic_accent</item>
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="iconTint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:iconTint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:tint">@color/epic_maneuver_bg_dark</item>
+        <item name="tint">@color/epic_maneuver_bg_dark</item>
+        <item name="android:textColor">@color/epic_maneuver_bg_dark</item>
     </style>
 </resources>

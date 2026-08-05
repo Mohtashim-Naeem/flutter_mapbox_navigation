@@ -225,6 +225,7 @@ class NavigationActivity : AppCompatActivity() {
                 .withIconColor("#61CB08")
         }
         tintDragHandle(binding.navigationView, isDark)
+        tintFloatingActionButtons(binding.navigationView, isDark)
 
         // set map style and route line color
         binding.navigationView.customizeViewOptions {
@@ -592,6 +593,73 @@ class NavigationActivity : AppCompatActivity() {
         val runnable = object : Runnable {
             override fun run() {
                 findAndTint(viewGroup)
+            }
+        }
+
+        viewGroup.post(runnable)
+        viewGroup.postDelayed(runnable, 300)
+        viewGroup.postDelayed(runnable, 800)
+        viewGroup.postDelayed(runnable, 1500)
+        viewGroup.postDelayed(runnable, 3000)
+    }
+
+    private fun tintFloatingActionButtons(viewGroup: android.view.View, isDark: Boolean) {
+        val iconColor = if (isDark) {
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_accent)
+        } else {
+            android.graphics.Color.parseColor("#0B2700")
+        }
+        val bgColor = if (isDark) {
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_surface_dark)
+        } else {
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_maneuver_bg_light)
+        }
+
+        val iconTintList = android.content.res.ColorStateList.valueOf(iconColor)
+        val bgTintList = android.content.res.ColorStateList.valueOf(bgColor)
+
+        fun traverseAndApply(v: android.view.View) {
+            val name = try { v.resources.getResourceEntryName(v.id) } catch (e: Exception) { "" }
+            val isActionButton = name.contains("camera", ignoreCase = true) ||
+                                 name.contains("audio", ignoreCase = true) ||
+                                 name.contains("recenter", ignoreCase = true) ||
+                                 name.contains("compass", ignoreCase = true) ||
+                                 name.contains("sound", ignoreCase = true) ||
+                                 name.contains("mute", ignoreCase = true) ||
+                                 name.contains("volume", ignoreCase = true) ||
+                                 name.contains("action", ignoreCase = true) ||
+                                 name.contains("button", ignoreCase = true) ||
+                                 name.contains("fab", ignoreCase = true)
+
+            if (isActionButton) {
+                try {
+                    v.backgroundTintList = bgTintList
+                    v.background?.mutate()?.setTint(bgColor)
+                } catch (e: Exception) {}
+            }
+
+            if (v is android.widget.ImageView) {
+                try {
+                    v.imageTintList = iconTintList
+                    v.drawable?.mutate()?.setTint(iconColor)
+                    v.setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN)
+                    androidx.core.graphics.drawable.DrawableCompat.setTint(
+                        androidx.core.graphics.drawable.DrawableCompat.wrap(v.drawable!!).mutate(),
+                        iconColor
+                    )
+                } catch (e: Exception) {}
+            }
+
+            if (v is android.view.ViewGroup) {
+                for (i in 0 until v.childCount) {
+                    traverseAndApply(v.getChildAt(i))
+                }
+            }
+        }
+
+        val runnable = object : Runnable {
+            override fun run() {
+                traverseAndApply(viewGroup)
             }
         }
 
