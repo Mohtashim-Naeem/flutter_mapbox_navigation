@@ -139,6 +139,20 @@ open class TurnByTurn(
 
         // initialize navigation trip observers
         this.registerObservers()
+
+        // Register back press handler once per navigation session.
+        // This intercepts the Android back button/gesture so Mapbox's internal
+        // back handling (which returns to FreeDrive screen) is bypassed.
+        val act = this.activity
+        if (act is androidx.activity.ComponentActivity) {
+            act.onBackPressedDispatcher.addCallback(act, object : androidx.activity.OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (!isDisposed.get()) {
+                        finishNavigation()
+                    }
+                }
+            })
+        }
     }
 
     override fun onMethodCall(methodCall: MethodCall, result: MethodChannel.Result) {
@@ -250,17 +264,20 @@ open class TurnByTurn(
                     )
                     val navView = this@TurnByTurn.binding.navigationView
                     if (navView.width > 0 && navView.height > 0) {
-                        navView.api.startRoutePreview(routes)
+                        navView.api.startActiveGuidance(routes)
                     } else {
                         navView.post {
                             if (!isDisposed.get() && sessionGeneration.get() == currentGen) {
-                                navView.api.startRoutePreview(routes)
+                                navView.api.startActiveGuidance(routes)
                             }
                         }
                     }
                     this@TurnByTurn.binding.navigationView.customizeViewBinders {
-                        // Remove native close button from bottom info panel to use Flutter UI close button instead
                         this.infoPanelEndNavigationButtonBinder = UIBinder { viewGroup ->
+                            viewGroup.removeAllViews()
+                            object : UIComponent() {}
+                        }
+                        this.infoPanelStartNavigationButtonBinder = UIBinder { viewGroup ->
                             viewGroup.removeAllViews()
                             object : UIComponent() {}
                         }
@@ -366,7 +383,6 @@ open class TurnByTurn(
     }
 
     open fun setOptions(arguments: Map<*, *>) {
-        Log.d("TurnByTurn", "setOptions args keys: ${arguments.keys}, isDarkThemeOverride=$isDarkThemeOverride")
         val navMode = arguments["mode"] as? String
         if (navMode != null) {
             when (navMode) {
@@ -415,6 +431,7 @@ open class TurnByTurn(
         this@TurnByTurn.binding.navigationView.customizeViewOptions {
             mapStyleUriDay = this@TurnByTurn.mapStyleUrlDay
             mapStyleUriNight = this@TurnByTurn.mapStyleUrlNight
+            enableMapLongClickIntercept = false
             
             val ctx = this@TurnByTurn.activity
             if (ctx != null) {
@@ -452,7 +469,6 @@ open class TurnByTurn(
 
         val panelBgDrawable = if (isDark) R.drawable.epic_info_panel_bg_dark else R.drawable.epic_info_panel_bg_light
         val progressStyle = if (isDark) R.style.EpicTripProgressStyleDark else R.style.EpicTripProgressStyleLight
-        val maneuverStyle = if (isDark) R.style.EpicManeuverStyleDark else R.style.EpicManeuverStyleLight
 
         val context = this@TurnByTurn.activity
         if (context != null) {
