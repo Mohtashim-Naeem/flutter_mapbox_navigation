@@ -458,12 +458,10 @@ open class TurnByTurn(
             }
         }
 
+
         // Detect dark mode: explicitly passed from Flutter, or fallback to map style heuristic
         val passedIsDark = arguments["isDarkTheme"] as? Boolean
-        if (passedIsDark != null) {
-            this.isDarkThemeOverride = passedIsDark
-        }
-        val isDark = this.isDarkThemeOverride ?: ((this.mapStyleUrlDay == this.mapStyleUrlNight &&
+        val isDark = passedIsDark ?: ((this.mapStyleUrlDay == this.mapStyleUrlNight &&
                       this.mapStyleUrlDay != Style.MAPBOX_STREETS) ||
                      this.mapStyleUrlDay?.lowercase()?.contains("dark") == true)
 
@@ -511,11 +509,17 @@ open class TurnByTurn(
                     
                 destinationMarkerAnnotationOptions = PointAnnotationOptions()
                     .withIconColor("#61CB08")
+                cameraModeButtonStyle = if (isDark) R.style.EpicCameraButtonStyleDark else R.style.EpicCameraButtonStyleLight
+                audioGuidanceButtonStyle = if (isDark) R.style.EpicAudioButtonStyleDark else R.style.EpicAudioButtonStyleLight
+                recenterButtonStyle = if (isDark) R.style.EpicRecenterButtonStyleDark else R.style.EpicRecenterButtonStyleLight
             }
         } else {
             this@TurnByTurn.binding.navigationView.customizeViewStyles {
                 infoPanelBackground = panelBgDrawable
                 tripProgressStyle = progressStyle
+                cameraModeButtonStyle = if (isDark) R.style.EpicCameraButtonStyleDark else R.style.EpicCameraButtonStyleLight
+                audioGuidanceButtonStyle = if (isDark) R.style.EpicAudioButtonStyleDark else R.style.EpicAudioButtonStyleLight
+                recenterButtonStyle = if (isDark) R.style.EpicRecenterButtonStyleDark else R.style.EpicRecenterButtonStyleLight
             }
         }
 

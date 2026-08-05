@@ -188,6 +188,9 @@ class NavigationActivity : AppCompatActivity() {
         binding.navigationView.customizeViewStyles {
             infoPanelBackground = panelBgDrawable
             tripProgressStyle = progressStyle
+            cameraModeButtonStyle = if (isDark) R.style.EpicCameraButtonStyleDark else R.style.EpicCameraButtonStyleLight
+            audioGuidanceButtonStyle = if (isDark) R.style.EpicAudioButtonStyleDark else R.style.EpicAudioButtonStyleLight
+            recenterButtonStyle = if (isDark) R.style.EpicRecenterButtonStyleDark else R.style.EpicRecenterButtonStyleLight
             maneuverViewOptions = ManeuverViewOptions.Builder()
                 .maneuverBackgroundColor(
                     if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light
