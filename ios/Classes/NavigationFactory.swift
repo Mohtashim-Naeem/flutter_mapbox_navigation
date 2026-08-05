@@ -206,6 +206,7 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
             self._navigationViewController = NavigationViewController(for: routeResponse, routeIndex: 0, routeOptions: options, navigationOptions: navOptions)
             self._navigationViewController!.modalPresentationStyle = .fullScreen
             self._navigationViewController!.delegate = self
+            self._navigationViewController!.routeLineTracksTraversal = true
             self._navigationViewController!.navigationMapView!.localizeLabels()
             self._navigationViewController!.showsReportFeedback = _showReportFeedbackButton
             self._navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback

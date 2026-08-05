@@ -88,6 +88,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                     strongSelf.navigationMapView.navigationCamera.follow()
                 }
             }
+            else if(call.method == "shutdownNavigation"){
+                strongSelf.shutdownNavigation(result: result)
+            }
             else
             {
                 result("method is not implemented");
@@ -164,12 +167,52 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         }
     }
 
+    deinit {
+        cleanUp()
+    }
+
+    func shutdownNavigation(result: FlutterResult? = nil) {
+        cleanUp()
+        result?(true)
+    }
+
+    func cleanUp() {
+        passiveLocationProvider.stopUpdatingLocation()
+        locationManager.stopUpdatingLocation()
+
+        if (navigationService != nil) {
+            navigationService.delegate = nil
+            navigationService.stop()
+            navigationService = nil
+        }
+
+        if (_navigationViewController != nil) {
+            _navigationViewController?.delegate = nil
+            _navigationViewController?.navigationMapView?.removeRoutes()
+            _navigationViewController?.navigationService.stop()
+            _navigationViewController?.navigationService.delegate = nil
+            _navigationViewController?.view.removeFromSuperview()
+            _navigationViewController?.removeFromParent()
+            _navigationViewController = nil
+        }
+
+        if (navigationMapView != nil) {
+            navigationMapView.delegate = nil
+            navigationMapView.removeRoutes()
+            navigationMapView.removeFromSuperview()
+            navigationMapView = nil
+        }
+
+        eventChannel.setStreamHandler(nil)
+        channel.setMethodCallHandler(nil)
+    }
+
     func clearRoute(arguments: NSDictionary?, result: @escaping FlutterResult)
     {
         if (navigationService != nil) {
             navigationService.stop()
         }
-        navigationMapView.removeRoutes()
+        navigationMapView?.removeRoutes()
         _navigationViewController?.navigationMapView?.removeRoutes()
         if (_navigationViewController != nil) {
             _navigationViewController?.view.removeFromSuperview()
@@ -322,6 +365,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
         _navigationViewController = NavigationViewController(for: response, routeIndex: selectedRouteIndex, routeOptions: routeOptions!, navigationOptions: navigationOptions)
         _navigationViewController!.delegate = self
+        _navigationViewController!.routeLineTracksTraversal = true
         _navigationViewController!.navigationMapView?.mapView.presentsWithTransaction = true
 
         _navigationViewController!.showsReportFeedback = _showReportFeedbackButton
