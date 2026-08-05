@@ -9,30 +9,44 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="EpicTripProgressPrimaryTextLight" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_maneuver_icon_light</item>
+    </style>
+
+    <style name="EpicTripProgressPrimaryTextDark" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
+    </style>
+
     <style name="EpicTripProgressSubTextLight" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">@color/epic_accent_secondary_light</item>
+        <item name="android:textColor">@color/epic_maneuver_icon_light</item>
     </style>
 
     <style name="EpicTripProgressSubTextDark" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
     </style>
 
     <style name="EpicTripProgressStyleLight" parent="MapboxStyleTripProgressView">
         <item name="tripProgressViewBackgroundColor">@color/epic_surface_light</item>
         <item name="tripProgressTextColor">@color/epic_maneuver_icon_light</item>
+        <item name="timeRemainingTextAppearance">@style/EpicTripProgressPrimaryTextLight</item>
         <item name="distanceRemainingTextAppearance">@style/EpicTripProgressSubTextLight</item>
         <item name="estimatedArrivalTimeTextAppearance">@style/EpicTripProgressSubTextLight</item>
-        <item name="distanceRemainingIconTint">@color/epic_accent_secondary_light</item>
-        <item name="estimatedArrivalTimeIconTint">@color/epic_accent_secondary_light</item>
+        <item name="distanceRemainingIconTint">@color/epic_maneuver_icon_light</item>
+        <item name="estimatedArrivalTimeIconTint">@color/epic_maneuver_icon_light</item>
+        <item name="android:textColor">@color/epic_maneuver_icon_light</item>
+        <item name="android:tint">@color/epic_maneuver_icon_light</item>
     </style>
 
     <style name="EpicTripProgressStyleDark" parent="MapboxStyleTripProgressView">
         <item name="tripProgressViewBackgroundColor">@color/epic_surface_dark</item>
-        <item name="tripProgressTextColor">@color/epic_accent</item>
+        <item name="tripProgressTextColor">@color/epic_text_primary_dark</item>
+        <item name="timeRemainingTextAppearance">@style/EpicTripProgressPrimaryTextDark</item>
         <item name="distanceRemainingTextAppearance">@style/EpicTripProgressSubTextDark</item>
         <item name="estimatedArrivalTimeTextAppearance">@style/EpicTripProgressSubTextDark</item>
-        <item name="distanceRemainingIconTint">@color/epic_accent</item>
-        <item name="estimatedArrivalTimeIconTint">@color/epic_accent</item>
+        <item name="distanceRemainingIconTint">@color/epic_text_primary_dark</item>
+        <item name="estimatedArrivalTimeIconTint">@color/epic_text_primary_dark</item>
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
+        <item name="android:tint">@color/epic_text_primary_dark</item>
     </style>
 
     <style name="EpicManeuverTextAppearanceLight" parent="TextAppearance.AppCompat">
@@ -87,14 +101,14 @@
     </style>
 
     <style name="EpicCameraButtonStyleLight" parent="DropInStyleCameraModeButton">
-        <item name="backgroundTint">@color/epic_maneuver_bg_light</item>
-        <item name="android:backgroundTint">@color/epic_maneuver_bg_light</item>
+        <item name="backgroundTint">@color/epic_accent</item>
+        <item name="android:backgroundTint">@color/epic_accent</item>
         <item name="cardBackgroundColor">@color/epic_maneuver_bg_light</item>
-        <item name="iconTint">@color/epic_maneuver_icon_light</item>
-        <item name="android:iconTint">@color/epic_maneuver_icon_light</item>
-        <item name="android:tint">@color/epic_maneuver_icon_light</item>
-        <item name="tint">@color/epic_maneuver_icon_light</item>
-        <item name="android:textColor">@color/epic_maneuver_icon_light</item>
+        <item name="iconTint">@color/epic_accent</item>
+        <item name="android:iconTint">@color/epic_accent</item>
+        <item name="android:tint">@color/epic_accent</item>
+        <item name="tint">@color/epic_accent</item>
+        <item name="android:textColor">@color/epic_accent</item>
     </style>
 
     <!-- Audio Guidance Button (mute/unmute) -->
@@ -110,14 +124,14 @@
     </style>
 
     <style name="EpicAudioButtonStyleLight" parent="DropInStyleAudioGuidanceButton">
-        <item name="backgroundTint">@color/epic_maneuver_bg_light</item>
-        <item name="android:backgroundTint">@color/epic_maneuver_bg_light</item>
+        <item name="backgroundTint">@color/epic_accent</item>
+        <item name="android:backgroundTint">@color/epic_accent</item>
         <item name="cardBackgroundColor">@color/epic_maneuver_bg_light</item>
-        <item name="iconTint">@color/epic_maneuver_icon_light</item>
-        <item name="android:iconTint">@color/epic_maneuver_icon_light</item>
-        <item name="android:tint">@color/epic_maneuver_icon_light</item>
-        <item name="tint">@color/epic_maneuver_icon_light</item>
-        <item name="android:textColor">@color/epic_maneuver_icon_light</item>
+        <item name="iconTint">@color/epic_accent</item>
+        <item name="android:iconTint">@color/epic_accent</item>
+        <item name="android:tint">@color/epic_accent</item>
+        <item name="tint">@color/epic_accent</item>
+        <item name="android:textColor">@color/epic_accent</item>
     </style>
 
     <!-- Recenter Button (location target/crosshair) -->
@@ -133,13 +147,13 @@
     </style>
 
     <style name="EpicRecenterButtonStyleLight" parent="DropInStyleRecenterButton">
-        <item name="backgroundTint">@color/epic_maneuver_bg_light</item>
-        <item name="android:backgroundTint">@color/epic_maneuver_bg_light</item>
+        <item name="backgroundTint">@color/epic_accent</item>
+        <item name="android:backgroundTint">@color/epic_accent</item>
         <item name="cardBackgroundColor">@color/epic_maneuver_bg_light</item>
-        <item name="iconTint">@color/epic_maneuver_icon_light</item>
-        <item name="android:iconTint">@color/epic_maneuver_icon_light</item>
-        <item name="android:tint">@color/epic_maneuver_icon_light</item>
-        <item name="tint">@color/epic_maneuver_icon_light</item>
-        <item name="android:textColor">@color/epic_maneuver_icon_light</item>
+        <item name="iconTint">@color/epic_accent</item>
+        <item name="android:iconTint">@color/epic_accent</item>
+        <item name="android:tint">@color/epic_accent</item>
+        <item name="tint">@color/epic_accent</item>
+        <item name="android:textColor">@color/epic_accent</item>
     </style>
 </resources>

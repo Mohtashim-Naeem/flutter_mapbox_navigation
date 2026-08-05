@@ -224,6 +224,7 @@ class NavigationActivity : AppCompatActivity() {
             destinationMarkerAnnotationOptions = PointAnnotationOptions()
                 .withIconColor("#61CB08")
         }
+        tintDragHandle(binding.navigationView, isDark)
 
         // set map style and route line color
         binding.navigationView.customizeViewOptions {
@@ -542,4 +543,62 @@ class NavigationActivity : AppCompatActivity() {
 
     private fun sendEvent(event: MapBoxRouteProgressEvent) {}
     private fun sendEvent(event: MapBoxEvents, data: String = "") {}
+
+    private fun tintDragHandle(viewGroup: android.view.View, isDark: Boolean) {
+        val color = if (isDark) {
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_text_primary_dark)
+        } else {
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_maneuver_icon_light)
+        }
+        val handleColorList = android.content.res.ColorStateList.valueOf(color)
+
+        fun applyTintToView(v: android.view.View) {
+            try {
+                v.backgroundTintList = handleColorList
+                v.background?.mutate()?.setTint(color)
+                if (v is android.widget.ImageView) {
+                    v.imageTintList = handleColorList
+                    v.drawable?.mutate()?.setTint(color)
+                }
+            } catch (e: Exception) {
+                // ignore
+            }
+        }
+
+        fun findAndTint(v: android.view.View) {
+            val name = try { v.resources.getResourceEntryName(v.id) } catch (e: Exception) { "" }
+            val isHandleByName = name.contains("handle", ignoreCase = true) ||
+                                 name.contains("drag", ignoreCase = true) ||
+                                 name.contains("grab", ignoreCase = true) ||
+                                 name.contains("indicator", ignoreCase = true) ||
+                                 name.contains("bar", ignoreCase = true)
+
+            val density = v.resources.displayMetrics.density
+            val hDp = v.height / density
+            val wDp = v.width / density
+            val isHandleByDimension = (hDp in 1.0..14.0 && wDp in 12.0..120.0)
+
+            if (isHandleByName || isHandleByDimension) {
+                applyTintToView(v)
+            }
+
+            if (v is android.view.ViewGroup) {
+                for (i in 0 until v.childCount) {
+                    findAndTint(v.getChildAt(i))
+                }
+            }
+        }
+
+        val runnable = object : Runnable {
+            override fun run() {
+                findAndTint(viewGroup)
+            }
+        }
+
+        viewGroup.post(runnable)
+        viewGroup.postDelayed(runnable, 300)
+        viewGroup.postDelayed(runnable, 800)
+        viewGroup.postDelayed(runnable, 1500)
+        viewGroup.postDelayed(runnable, 3000)
+    }
 }

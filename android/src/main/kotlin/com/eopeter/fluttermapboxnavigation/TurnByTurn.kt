@@ -513,15 +513,8 @@ open class TurnByTurn(
                 audioGuidanceButtonStyle = if (isDark) R.style.EpicAudioButtonStyleDark else R.style.EpicAudioButtonStyleLight
                 recenterButtonStyle = if (isDark) R.style.EpicRecenterButtonStyleDark else R.style.EpicRecenterButtonStyleLight
             }
-        } else {
-            this@TurnByTurn.binding.navigationView.customizeViewStyles {
-                infoPanelBackground = panelBgDrawable
-                tripProgressStyle = progressStyle
-                cameraModeButtonStyle = if (isDark) R.style.EpicCameraButtonStyleDark else R.style.EpicCameraButtonStyleLight
-                audioGuidanceButtonStyle = if (isDark) R.style.EpicAudioButtonStyleDark else R.style.EpicAudioButtonStyleLight
-                recenterButtonStyle = if (isDark) R.style.EpicRecenterButtonStyleDark else R.style.EpicRecenterButtonStyleLight
-            }
         }
+        tintDragHandle(this@TurnByTurn.binding.navigationView, isDark)
 
         this.initialLatitude = arguments["initialLatitude"] as? Double
         this.initialLongitude = arguments["initialLongitude"] as? Double
@@ -716,4 +709,62 @@ open class TurnByTurn(
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     override fun onActivityDestroyed(activity: Activity) {}
+
+    private fun tintDragHandle(viewGroup: android.view.View, isDark: Boolean) {
+        val color = if (isDark) {
+            ContextCompat.getColor(viewGroup.context, R.color.epic_text_primary_dark)
+        } else {
+            ContextCompat.getColor(viewGroup.context, R.color.epic_maneuver_icon_light)
+        }
+        val handleColorList = android.content.res.ColorStateList.valueOf(color)
+
+        fun applyTintToView(v: android.view.View) {
+            try {
+                v.backgroundTintList = handleColorList
+                v.background?.mutate()?.setTint(color)
+                if (v is android.widget.ImageView) {
+                    v.imageTintList = handleColorList
+                    v.drawable?.mutate()?.setTint(color)
+                }
+            } catch (e: Exception) {
+                // ignore
+            }
+        }
+
+        fun findAndTint(v: android.view.View) {
+            val name = try { v.resources.getResourceEntryName(v.id) } catch (e: Exception) { "" }
+            val isHandleByName = name.contains("handle", ignoreCase = true) ||
+                                 name.contains("drag", ignoreCase = true) ||
+                                 name.contains("grab", ignoreCase = true) ||
+                                 name.contains("indicator", ignoreCase = true) ||
+                                 name.contains("bar", ignoreCase = true)
+
+            val density = v.resources.displayMetrics.density
+            val hDp = v.height / density
+            val wDp = v.width / density
+            val isHandleByDimension = (hDp in 1.0..14.0 && wDp in 12.0..120.0)
+
+            if (isHandleByName || isHandleByDimension) {
+                applyTintToView(v)
+            }
+
+            if (v is android.view.ViewGroup) {
+                for (i in 0 until v.childCount) {
+                    findAndTint(v.getChildAt(i))
+                }
+            }
+        }
+
+        val runnable = object : Runnable {
+            override fun run() {
+                findAndTint(viewGroup)
+            }
+        }
+
+        viewGroup.post(runnable)
+        viewGroup.postDelayed(runnable, 300)
+        viewGroup.postDelayed(runnable, 800)
+        viewGroup.postDelayed(runnable, 1500)
+        viewGroup.postDelayed(runnable, 3000)
+    }
 }
