@@ -525,6 +525,12 @@ open class TurnByTurn(
             this.zoom = zm
         }
 
+        val arrivalRadius = (arguments["arrivalRadius"] as? Number)?.toDouble()
+        if (arrivalRadius != null && arrivalRadius > 0) {
+            this.customArrivalRadius = arrivalRadius
+            this.hasTriggeredArrival = false
+        }
+
         val br = arguments["bearing"] as? Double
         if (br != null) {
             this.bearing = br
@@ -675,6 +681,9 @@ open class TurnByTurn(
         }
     }
 
+    private var customArrivalRadius: Double? = null
+    private var hasTriggeredArrival = false
+
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         if (isDisposed.get() || this.isNavigationCanceled) return@RouteProgressObserver
         try {
@@ -682,13 +691,24 @@ open class TurnByTurn(
             this.durationRemaining = routeProgress.durationRemaining
             val progressEvent = MapBoxRouteProgressEvent(routeProgress)
             sendEvent(progressEvent)
+
+            val radius = customArrivalRadius
+            if (radius != null && radius > 0 && !hasTriggeredArrival) {
+                if (routeProgress.distanceRemaining <= radius) {
+                    hasTriggeredArrival = true
+                    sendEvent(MapBoxEvents.ON_ARRIVAL)
+                }
+            }
         } catch (_: java.lang.Exception) {}
     }
 
     private val arrivalObserver: ArrivalObserver = object : ArrivalObserver {
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
             if (isDisposed.get()) return
-            sendEvent(MapBoxEvents.ON_ARRIVAL)
+            if (!hasTriggeredArrival) {
+                hasTriggeredArrival = true
+                sendEvent(MapBoxEvents.ON_ARRIVAL)
+            }
         }
 
         override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {}

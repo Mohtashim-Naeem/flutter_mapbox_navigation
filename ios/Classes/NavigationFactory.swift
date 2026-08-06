@@ -31,6 +31,7 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
     var _mapStyleUrlDay: String?
     var _mapStyleUrlNight: String?
     var _isDarkTheme = false
+    var _arrivalRadius: Double?
     var _zoom: Double = 13.0
     var _tilt: Double = 0.0
     var _bearing: Double = 0.0
@@ -259,6 +260,7 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
         _mapStyleUrlDay = arguments?["mapStyleUrlDay"] as? String
         _mapStyleUrlNight = arguments?["mapStyleUrlNight"] as? String
         _isDarkTheme = arguments?["isDarkTheme"] as? Bool ?? _isDarkTheme
+        _arrivalRadius = arguments?["arrivalRadius"] as? Double
         _zoom = arguments?["zoom"] as? Double ?? _zoom
         _bearing = arguments?["bearing"] as? Double ?? _bearing
         _tilt = arguments?["tilt"] as? Double ?? _tilt

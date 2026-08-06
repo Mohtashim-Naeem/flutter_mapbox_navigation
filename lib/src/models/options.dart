@@ -36,6 +36,7 @@ class MapBoxOptions {
     this.showEndOfRouteFeedback = true,
     this.enableOnMapTapCallback = false,
     this.isDarkTheme,
+    this.arrivalRadius,
   });
 
   MapBoxOptions.from(MapBoxOptions option) {
@@ -62,6 +63,7 @@ class MapBoxOptions {
     showReportFeedbackButton = option.showReportFeedbackButton;
     showEndOfRouteFeedback = option.showEndOfRouteFeedback;
     isDarkTheme = option.isDarkTheme;
+    arrivalRadius = option.arrivalRadius;
   }
 
   /// The initial Latitude of the Map View
@@ -173,8 +175,11 @@ class MapBoxOptions {
   /// Explicitly tell the native side whether to use the dark theme for UI components
   bool? isDarkTheme;
 
+  /// Distance threshold in meters for arrival detection.
+  double? arrivalRadius;
+
   Map<String, dynamic> toMap() {
-    final optionsMap = <String, dynamic>{};
+    final Map<String, dynamic> optionsMap = <String, dynamic>{};
     void addIfNonNull(String fieldName, dynamic value) {
       if (value != null) {
         optionsMap[fieldName] = value;
@@ -231,6 +236,7 @@ class MapBoxOptions {
     addIfNonNull('showEndOfRouteFeedback', showEndOfRouteFeedback);
     addIfNonNull('enableOnMapTapCallback', enableOnMapTapCallback);
     addIfNonNull('isDarkTheme', isDarkTheme);
+    addIfNonNull('arrivalRadius', arrivalRadius);
 
     return optionsMap;
   }

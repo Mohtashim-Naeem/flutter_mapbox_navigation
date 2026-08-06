@@ -253,6 +253,12 @@ class NavigationActivity : AppCompatActivity() {
                 .withArrowCasingColor(ContextCompat.getColor(this@NavigationActivity, R.color.epic_accent))
                 .build()
         }
+
+        val arrivalRadius = intent.getDoubleExtra("arrivalRadius", -1.0)
+        if (arrivalRadius > 0) {
+            this.customArrivalRadius = arrivalRadius
+            this.hasTriggeredArrival = false
+        }
         if (FlutterMapboxNavigationPlugin.enableFreeDriveMode) {
             binding.navigationView.api.routeReplayEnabled(FlutterMapboxNavigationPlugin.simulateRoute)
             binding.navigationView.api.startFreeDrive()
@@ -433,6 +439,9 @@ class NavigationActivity : AppCompatActivity() {
     private lateinit var binding: NavigationActivityBinding// MapboxActivityTurnByTurnExperienceBinding
 
 
+    private var customArrivalRadius: Double? = null
+    private var hasTriggeredArrival = false
+
     /**
      * Gets notified with progress along the currently active route.
      */
@@ -442,12 +451,24 @@ class NavigationActivity : AppCompatActivity() {
         FlutterMapboxNavigationPlugin.distanceRemaining = routeProgress.distanceRemaining
         FlutterMapboxNavigationPlugin.durationRemaining = routeProgress.durationRemaining
         sendEvent(progressEvent)
+
+        val radius = customArrivalRadius
+        if (radius != null && radius > 0 && !hasTriggeredArrival) {
+            if (routeProgress.distanceRemaining <= radius) {
+                hasTriggeredArrival = true
+                isNavigationInProgress = false
+                sendEvent(MapBoxEvents.ON_ARRIVAL)
+            }
+        }
     }
 
     private val arrivalObserver: ArrivalObserver = object : ArrivalObserver {
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
             isNavigationInProgress = false
-            sendEvent(MapBoxEvents.ON_ARRIVAL)
+            if (!hasTriggeredArrival) {
+                hasTriggeredArrival = true
+                sendEvent(MapBoxEvents.ON_ARRIVAL)
+            }
         }
 
         override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
