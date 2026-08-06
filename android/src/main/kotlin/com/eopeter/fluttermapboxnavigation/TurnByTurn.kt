@@ -478,10 +478,10 @@ open class TurnByTurn(
                         if (isDark) R.color.epic_maneuver_bg_dark else R.color.epic_maneuver_bg_light   
                     )
                     .subManeuverBackgroundColor(
-                        if (isDark) R.color.epic_upcoming else R.color.epic_surface_light
+                        if (isDark) R.color.epic_upcoming else R.color.epic_maneuver_bg_light
                     )
                     .upcomingManeuverBackgroundColor(
-                        if (isDark) R.color.epic_upcoming else R.color.epic_surface_light
+                        if (isDark) R.color.epic_upcoming else R.color.epic_maneuver_bg_light
                     )
                     .primaryManeuverOptions(
                         ManeuverPrimaryOptions.Builder()
@@ -813,6 +813,12 @@ open class TurnByTurn(
                         androidx.core.graphics.drawable.DrawableCompat.wrap(v.drawable!!).mutate(),
                         iconColor
                     )
+                } catch (e: Exception) {}
+            }
+
+            if (v is android.widget.TextView) {
+                try {
+                    v.setTextColor(iconColor)
                 } catch (e: Exception) {}
             }
 

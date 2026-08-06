@@ -50,13 +50,12 @@
     </style>
 
     <style name="EpicManeuverTextAppearanceLight" parent="TextAppearance.AppCompat">
-        <item name="android:textColor">@color/epic_text_primary_light</item>
+        <item name="android:textColor">@color/epic_maneuver_bg_dark</item>
     </style>
 
     <style name="EpicManeuverTextAppearanceDark" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@color/epic_text_primary_dark</item>
     </style>
-
 
     <style name="EpicManeuverStyleLight" parent="MapboxStyleManeuverView">
         <item name="maneuverViewBackgroundColor">@color/epic_maneuver_bg_light</item>

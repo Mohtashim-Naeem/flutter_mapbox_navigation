@@ -650,6 +650,12 @@ class NavigationActivity : AppCompatActivity() {
                 } catch (e: Exception) {}
             }
 
+            if (v is android.widget.TextView) {
+                try {
+                    v.setTextColor(iconColor)
+                } catch (e: Exception) {}
+            }
+
             if (v is android.view.ViewGroup) {
                 for (i in 0 until v.childCount) {
                     traverseAndApply(v.getChildAt(i))
