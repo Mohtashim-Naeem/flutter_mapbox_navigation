@@ -356,7 +356,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             nightStyle.mapStyleURL = URL(string: _mapStyleUrlNight!)!
         }
         let isDark = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
-        let styles: [Style] = isDark ? [nightStyle, dayStyle] : [dayStyle, nightStyle]
+        let styles: [MapboxNavigation.Style] = isDark ? [nightStyle] : [dayStyle]
         let navigationOptions = NavigationOptions(styles: styles, navigationService: navigationService)
 
         // Remove previous navigation view and controller if any
@@ -443,6 +443,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 }
 
 extension FlutterMapboxNavigationView : NavigationServiceDelegate {
+
 
     public func navigationService(_ service: NavigationService, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {
         _lastKnownLocation = location

@@ -182,7 +182,7 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
                         nightStyle.mapStyleURL = URL(string: strongSelf._mapStyleUrlNight!)!
                     }
                     let isDark = strongSelf._isDarkTheme || (strongSelf._mapStyleUrlDay?.lowercased().contains("dark") == true)
-                    let styles: [Style] = isDark ? [nightStyle, dayStyle] : [dayStyle, nightStyle]
+                    let styles: [MapboxNavigation.Style] = isDark ? [nightStyle] : [dayStyle]
                     let navigationOptions = NavigationOptions(styles: styles, navigationService: navigationService)
                     if (isUpdatingWaypoints) {
                         strongSelf._navigationViewController?.navigationService.router.updateRoute(with: IndexedRouteResponse(routeResponse: response, routeIndex: 0), routeOptions: strongSelf._options) { success in
