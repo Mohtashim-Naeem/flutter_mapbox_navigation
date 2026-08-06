@@ -355,7 +355,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         if(_mapStyleUrlNight != nil){
             nightStyle.mapStyleURL = URL(string: _mapStyleUrlNight!)!
         }
-        let navigationOptions = NavigationOptions(styles: [dayStyle, nightStyle], navigationService: navigationService)
+        let isDark = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
+        let styles: [Style] = isDark ? [nightStyle, dayStyle] : [dayStyle, nightStyle]
+        let navigationOptions = NavigationOptions(styles: styles, navigationService: navigationService)
 
         // Remove previous navigation view and controller if any
         if(_navigationViewController?.view != nil){
