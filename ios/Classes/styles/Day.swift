@@ -41,7 +41,7 @@ class CustomDayStyle: DayStyle {
         BottomPaddingView.appearance().backgroundColor = lightSurface
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
-        DateLabel.appearance().textColor = textPrimary
+        ArrivalTimeLabel.appearance().textColor = textPrimary
         
         PrimaryLabel.appearance().textColor = textPrimary
         SecondaryLabel.appearance().textColor = textPrimary

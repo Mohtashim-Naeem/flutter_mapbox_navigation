@@ -42,7 +42,7 @@ class CustomNightStyle: NightStyle {
         BottomPaddingView.appearance().backgroundColor = darkSurface
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
-        DateLabel.appearance().textColor = textPrimary
+        ArrivalTimeLabel.appearance().textColor = textPrimary
         
         PrimaryLabel.appearance().textColor = textPrimary
         SecondaryLabel.appearance().textColor = textPrimary
