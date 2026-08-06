@@ -32,8 +32,8 @@ class CustomNightStyle: NightStyle {
 
     override func apply() {
         super.apply()
-        let darkSurface = UIColor(red: 16.0 / 255.0, green: 43.0 / 255.0, blue: 13.0 / 255.0, alpha: 1.0)
-        let maneuverBg = UIColor(red: 18.0 / 255.0, green: 31.0 / 255.0, blue: 17.0 / 255.0, alpha: 1.0)
+        let darkSurface = UIColor(red: 24.0 / 255.0, green: 56.0 / 255.0, blue: 20.0 / 255.0, alpha: 1.0)
+        let maneuverBg = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
         let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
         let textPrimary = UIColor(red: 255.0 / 255.0, green: 255.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0)
 
@@ -46,6 +46,9 @@ class CustomNightStyle: NightStyle {
         
         PrimaryLabel.appearance().textColor = textPrimary
         SecondaryLabel.appearance().textColor = textPrimary
+        InstructionLabel.appearance().textColor = textPrimary
+        TitleLabel.appearance().textColor = textPrimary
+        SubtitleLabel.appearance().textColor = textPrimary
         
         ManeuverView.appearance().primaryColor = textPrimary
         ManeuverView.appearance().secondaryColor = textPrimary

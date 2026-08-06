@@ -45,6 +45,9 @@ class CustomDayStyle: DayStyle {
         
         PrimaryLabel.appearance().textColor = textPrimary
         SecondaryLabel.appearance().textColor = textPrimary
+        InstructionLabel.appearance().textColor = textPrimary
+        TitleLabel.appearance().textColor = textPrimary
+        SubtitleLabel.appearance().textColor = textPrimary
         
         ManeuverView.appearance().primaryColor = textPrimary
         ManeuverView.appearance().secondaryColor = textPrimary
