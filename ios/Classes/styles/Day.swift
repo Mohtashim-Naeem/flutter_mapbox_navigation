@@ -44,8 +44,6 @@ class CustomDayStyle: DayStyle {
         
         StepsBackgroundView.appearance().backgroundColor = maneuverBg
         StepTableViewCell.appearance().backgroundColor = maneuverBg
-        StepsTableHeaderView.appearance().backgroundColor = maneuverBg
-        StepsTableFooterView.appearance().backgroundColor = lightSurface
         
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary

@@ -45,8 +45,6 @@ class CustomNightStyle: NightStyle {
         
         StepsBackgroundView.appearance().backgroundColor = maneuverBg
         StepTableViewCell.appearance().backgroundColor = maneuverBg
-        StepsTableHeaderView.appearance().backgroundColor = maneuverBg
-        StepsTableFooterView.appearance().backgroundColor = darkSurface
         
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
