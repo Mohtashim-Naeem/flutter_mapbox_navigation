@@ -355,9 +355,14 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
                 (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
             }
 
-            // 8. TimeRemainingLabel in bottom banner
-            if typeName.contains("TimeRemaining") {
-                (view as? UILabel)?.textColor = brandGreen
+            // 8. Labels - ensure visible text color against new backgrounds
+            if let label = view as? UILabel {
+                label.backgroundColor = .clear
+                if typeName.contains("TimeRemaining") {
+                    label.textColor = brandGreen
+                } else {
+                    label.textColor = textColor
+                }
             }
             
             // 9. Close / Cancel / Dismiss buttons
