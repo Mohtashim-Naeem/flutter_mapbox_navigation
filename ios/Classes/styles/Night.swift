@@ -22,12 +22,22 @@ class CustomNightStyle: NightStyle {
 
     func initStyle()
     {
+        let darkSurface = UIColor(red: 24.0 / 255.0, green: 56.0 / 255.0, blue: 20.0 / 255.0, alpha: 1.0)  // #183814
+        let darkestGreen = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0) // #0B2700
+        let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)   // #61CB08
+
         // Use a custom map style.
         mapStyleURL = URL(string: StyleURI.navigationNight.rawValue)!
         previewMapStyleURL = mapStyleURL
 
         // Specify that the style should be used during the day.
         styleType = .night
+
+        // Set Mapbox SDK Style properties for native theme inheritance
+        primaryBackgroundColor = darkestGreen
+        secondaryBackgroundColor = darkestGreen
+        buttonBackgroundColor = darkSurface
+        tintColor = brandGreen
     }
 
     override func apply() {
