@@ -247,8 +247,24 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
                 guard let self = self, let navVC = self._navigationViewController else { return }
                 let isDarkMode = self._isDarkTheme || (self._mapStyleUrlDay?.lowercased().contains("dark") == true)
                 self.applyEpicThemeToNavVC(navVC, isDark: isDarkMode)
+                self.startThemeReapplyTimer(isDark: isDarkMode)
             }
         }
+    }
+    
+    var themeReapplyTimer: Timer?
+
+    func startThemeReapplyTimer(isDark: Bool) {
+        themeReapplyTimer?.invalidate()
+        themeReapplyTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
+            guard let self = self, let navVC = self._navigationViewController else { return }
+            self.applyEpicThemeToNavVC(navVC, isDark: isDark)
+        }
+    }
+
+    func stopThemeReapplyTimer() {
+        themeReapplyTimer?.invalidate()
+        themeReapplyTimer = nil
     }
     
     // ─── Epic Theme Direct Application ───────────────────────────────────────
@@ -452,6 +468,7 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
     
     func endNavigation(result: FlutterResult?)
     {
+        stopThemeReapplyTimer()
         sendEvent(eventType: MapBoxEventType.navigation_finished)
         if(self._navigationViewController != nil)
         {

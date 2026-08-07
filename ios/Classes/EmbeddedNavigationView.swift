@@ -177,6 +177,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
     }
 
     func cleanUp() {
+        stopThemeReapplyTimer()
         passiveLocationProvider.stopUpdatingLocation()
         locationManager.stopUpdatingLocation()
 
@@ -417,6 +418,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
             guard let self = self, let navVC = self._navigationViewController else { return }
             self.applyEpicThemeToNavVC(navVC, isDark: isDarkMode)
+            self.startThemeReapplyTimer(isDark: isDarkMode)
         }
         
         result(true)
