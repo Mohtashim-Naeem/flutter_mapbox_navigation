@@ -430,7 +430,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         let bottomBg  = isDark ? darkSurface  : lightSurface
         let textColor = isDark ? textWhite    : textDark
         
-        navVC.showsReportFeedback = _showReportFeedbackButton
+        _navigationViewController!.showsReportFeedback = false
+        _navigationViewController!.showsEndOfRouteFeedback = false
         
         // Force map style URL on map engine directly
         if let styleUrl = isDark ? _mapStyleUrlNight : _mapStyleUrlDay, let url = URL(string: styleUrl) {
@@ -440,13 +441,12 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         applyToAllSubviews(of: navVC.view) { view in
             let typeName = String(describing: type(of: view))
             
-            // 1. Hide report feedback button (chat icon) if disabled
-            if !_showReportFeedbackButton {
-                if typeName.contains("Report") || typeName.contains("Feedback") {
-                    view.isHidden = true
-                    view.alpha = 0
-                    return
-                }
+            // 1. Unconditionally hide and remove report / feedback button (speech bubble icon)
+            if typeName.contains("Report") || typeName.contains("Feedback") {
+                view.isHidden = true
+                view.alpha = 0
+                view.removeFromSuperview()
+                return
             }
 
             // 2. Top banners, Sub maneuvers, Next step banners, Information stack
