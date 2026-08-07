@@ -448,7 +448,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             navVC.navigationMapView?.mapView.mapboxMap.style.uri = StyleURI(url: url)
         }
         
-        applyToAllSubviews(of: navVC.view) { view in
+        let block: (UIView) -> Void = { [weak self] view in
+            guard let self = self else { return }
             let typeName = String(describing: type(of: view))
             
             if view.backgroundColor != nil && view.backgroundColor != .clear {
@@ -539,6 +540,16 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                     button.tintColor = isDark ? brandGreen : textDark
                 }
             }
+        }
+
+        applyToAllSubviews(of: navVC.view, apply: block)
+        
+        for child in navVC.children {
+            applyToAllSubviews(of: child.view, apply: block)
+        }
+        
+        if let presented = navVC.presentedViewController {
+            applyToAllSubviews(of: presented.view, apply: block)
         }
     }
     
