@@ -21,22 +21,12 @@ class CustomDayStyle: DayStyle {
 
     func initStyle()
     {
-        let lightSurface = UIColor(red: 255.0 / 255.0, green: 255.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0)
-        let maneuverBg = UIColor(red: 249.0 / 255.0, green: 250.0 / 255.0, blue: 249.0 / 255.0, alpha: 1.0)
-        let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
-
         // Use a custom map style.
         mapStyleURL = URL(string: StyleURI.navigationDay.rawValue)!
         previewMapStyleURL = mapStyleURL
 
         // Specify that the style should be used during the day.
         styleType = .day
-
-        // Set Mapbox SDK Style properties for native theme inheritance
-        primaryBackgroundColor = maneuverBg
-        secondaryBackgroundColor = lightSurface
-        buttonBackgroundColor = UIColor(red: 234.0 / 255.0, green: 243.0 / 255.0, blue: 222.0 / 255.0, alpha: 1.0)
-        tintColor = brandGreen
     }
 
     override func apply() {
