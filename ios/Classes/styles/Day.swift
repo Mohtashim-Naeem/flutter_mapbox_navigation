@@ -4,30 +4,27 @@ import MapboxMaps
 
 class CustomDayStyle: DayStyle {
 
-    static var customUrl: String?
-
     required init() {
         super.init()
         initStyle()
     }
 
     init(url: String?){
-        CustomDayStyle.customUrl = url
         super.init()
-        initStyle()
-    }
-
-    func initStyle()
-    {
-        if let urlStr = CustomDayStyle.customUrl, let url = URL(string: urlStr) {
-            mapStyleURL = url
-            previewMapStyleURL = url
+        if let urlString = url, let validUrl = URL(string: urlString) {
+            mapStyleURL = validUrl
+            previewMapStyleURL = validUrl
         } else {
             mapStyleURL = URL(string: StyleURI.navigationDay.rawValue)!
             previewMapStyleURL = mapStyleURL
         }
+        styleType = .day
+    }
 
-        // Specify that the style should be used during the day.
+    func initStyle()
+    {
+        mapStyleURL = URL(string: StyleURI.navigationDay.rawValue)!
+        previewMapStyleURL = mapStyleURL
         styleType = .day
     }
 
@@ -45,6 +42,11 @@ class CustomDayStyle: DayStyle {
         BottomBannerView.appearance().backgroundColor = lightSurface
         BottomPaddingView.appearance().backgroundColor = lightSurface
         
+        StepsBackgroundView.appearance().backgroundColor = maneuverBg
+        StepTableViewCell.appearance().backgroundColor = maneuverBg
+        StepsTableHeaderView.appearance().backgroundColor = maneuverBg
+        StepsTableFooterView.appearance().backgroundColor = lightSurface
+        
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
         ArrivalTimeLabel.appearance().textColor = textPrimary
@@ -60,6 +62,8 @@ class CustomDayStyle: DayStyle {
         
         ResumeButton.appearance().backgroundColor = lightSurface
         ResumeButton.appearance().tintColor = brandGreen
+        DismissButton.appearance().tintColor = brandGreen
+        CancelButton.appearance().tintColor = brandGreen
         
         // Floating action buttons (Light theme)
         if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {

@@ -5,30 +5,27 @@ import MapboxNavigation
 
 class CustomNightStyle: NightStyle {
 
-    static var customUrl: String?
-
     required init() {
         super.init()
         initStyle()
     }
 
     init(url: String?){
-        CustomNightStyle.customUrl = url
         super.init()
-        initStyle()
-    }
-
-    func initStyle()
-    {
-        if let urlStr = CustomNightStyle.customUrl, let url = URL(string: urlStr) {
-            mapStyleURL = url
-            previewMapStyleURL = url
+        if let urlString = url, let validUrl = URL(string: urlString) {
+            mapStyleURL = validUrl
+            previewMapStyleURL = validUrl
         } else {
             mapStyleURL = URL(string: StyleURI.navigationNight.rawValue)!
             previewMapStyleURL = mapStyleURL
         }
+        styleType = .night
+    }
 
-        // Specify that the style should be used during the night.
+    func initStyle()
+    {
+        mapStyleURL = URL(string: StyleURI.navigationNight.rawValue)!
+        previewMapStyleURL = mapStyleURL
         styleType = .night
     }
 
@@ -46,6 +43,11 @@ class CustomNightStyle: NightStyle {
         BottomBannerView.appearance().backgroundColor = darkSurface
         BottomPaddingView.appearance().backgroundColor = darkSurface
         
+        StepsBackgroundView.appearance().backgroundColor = maneuverBg
+        StepTableViewCell.appearance().backgroundColor = maneuverBg
+        StepsTableHeaderView.appearance().backgroundColor = maneuverBg
+        StepsTableFooterView.appearance().backgroundColor = darkSurface
+        
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
         ArrivalTimeLabel.appearance().textColor = textPrimary
@@ -61,6 +63,8 @@ class CustomNightStyle: NightStyle {
         
         ResumeButton.appearance().backgroundColor = darkSurface
         ResumeButton.appearance().tintColor = brandGreen
+        DismissButton.appearance().tintColor = brandGreen
+        CancelButton.appearance().tintColor = brandGreen
         
         // Floating action buttons (Dark theme)
         if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {

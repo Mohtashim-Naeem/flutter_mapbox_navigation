@@ -432,6 +432,11 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         
         navVC.showsReportFeedback = _showReportFeedbackButton
         
+        // Force map style URL on map engine directly
+        if let styleUrl = isDark ? _mapStyleUrlNight : _mapStyleUrlDay, let url = URL(string: styleUrl) {
+            navVC.navigationMapView?.mapView.mapboxMap.style.uri = StyleURI(url: url)
+        }
+        
         applyToAllSubviews(of: navVC.view) { view in
             let typeName = String(describing: type(of: view))
             
@@ -449,11 +454,12 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                typeName.contains("StepInstructions") || typeName.contains("InformationStack") ||
                typeName.contains("ManeuverContainer") || typeName.contains("NextBanner") ||
                typeName.contains("NextStep") || typeName.contains("StatusView") ||
-               typeName.contains("LanesView") || typeName.contains("LaneView") {
+               typeName.contains("LanesView") || typeName.contains("LaneView") ||
+               typeName.contains("StepsBackground") || typeName.contains("StepsTableHeader") {
                 view.backgroundColor = bannerBg
             }
             
-            // 3. Steps Table View (Expanded turn-by-turn list) & Cells
+            // 3. Steps Table View (Expanded turn-by-turn list)
             if typeName.contains("Steps") || typeName.contains("StepTable") || view is UITableView {
                 view.backgroundColor = bannerBg
                 if let tableView = view as? UITableView {
@@ -461,6 +467,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                     tableView.separatorColor = isDark ? darkSurface : UIColor.lightGray
                 }
             }
+            
+            // 4. Cells in steps list
             if view is UITableViewCell || typeName.contains("StepCell") || typeName.contains("StepTableViewCell") {
                 view.backgroundColor = bannerBg
                 if let cell = view as? UITableViewCell {
@@ -471,13 +479,13 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 }
             }
 
-            // 4. Bottom banners & footer bars (including Close button bar)
+            // 5. Bottom banners & footer bars (including Close button bar at bottom of steps list)
             if typeName.contains("BottomBanner") || typeName.contains("BottomPadding") ||
-               typeName.contains("ArrivalView") || typeName.contains("Footer") {
+               typeName.contains("ArrivalView") || typeName.contains("Footer") || typeName.contains("StepsTableFooter") {
                 view.backgroundColor = bottomBg
             }
 
-            // 5. Resume Button (recenter button when map panned)
+            // 6. Resume Button (recenter button when map panned)
             if typeName.contains("ResumeButton") {
                 view.backgroundColor = isDark ? darkSurface : lightSurface
                 if let button = view as? UIButton {
@@ -486,7 +494,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 }
             }
 
-            // 6. Floating action buttons (Audio, Recenter, Overview)
+            // 7. Floating action buttons (Audio, Recenter, Overview)
             if typeName.contains("FloatingButton") {
                 if !_showReportFeedbackButton && (typeName.contains("Report") || typeName.contains("Feedback")) {
                     view.isHidden = true
@@ -496,8 +504,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
             }
 
-            // 7. Labels & Text Colors
+            // 8. Labels - set clear background and correct text color
             if let label = view as? UILabel {
+                label.backgroundColor = .clear
                 if typeName.contains("TimeRemaining") {
                     label.textColor = brandGreen
                 } else {
@@ -505,9 +514,10 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 }
             }
             
-            // 8. Close / Cancel / Dismiss buttons
+            // 9. Close / Cancel / Dismiss buttons
             if let button = view as? UIButton {
-                if button.title(for: .normal) == "Close" || button.title(for: .normal) == "Cancel" || typeName.contains("Dismiss") || typeName.contains("Cancel") {
+                let title = button.title(for: .normal) ?? ""
+                if title == "Close" || title == "Cancel" || typeName.contains("Dismiss") || typeName.contains("Cancel") {
                     button.setTitleColor(isDark ? brandGreen : textDark, for: .normal)
                     button.tintColor = isDark ? brandGreen : textDark
                 }
