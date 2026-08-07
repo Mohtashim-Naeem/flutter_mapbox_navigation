@@ -182,7 +182,11 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
                         nightStyle.mapStyleURL = URL(string: strongSelf._mapStyleUrlNight!)!
                     }
                     let isDark = strongSelf._isDarkTheme || (strongSelf._mapStyleUrlDay?.lowercased().contains("dark") == true)
-                    let styles: [MapboxNavigation.Style] = isDark ? [nightStyle] : [dayStyle]
+                    let styles: [MapboxNavigation.Style] = isDark ? [nightStyle, dayStyle] : [dayStyle, nightStyle]
+                    
+                    // Fix 3: Apply UIAppearance proxies before NavigationViewController is initialized
+                    styles.first?.apply()
+                    
                     let navigationOptions = NavigationOptions(styles: styles, navigationService: navigationService)
                     if (isUpdatingWaypoints) {
                         strongSelf._navigationViewController?.navigationService.router.updateRoute(with: IndexedRouteResponse(routeResponse: response, routeIndex: 0), routeOptions: strongSelf._options) { success in
@@ -214,6 +218,16 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
             self._navigationViewController!.navigationMapView!.localizeLabels()
             self._navigationViewController!.showsReportFeedback = _showReportFeedbackButton
             self._navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
+            
+            // Fix 1: Override route line color to Epic green
+            if let navMapView = self._navigationViewController!.navigationMapView {
+                navMapView.trafficUnknownColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+                navMapView.trafficLowColor    = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+                navMapView.trafficModerateColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+                navMapView.trafficHeavyColor  = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+                navMapView.trafficSevereColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+                navMapView.routeCasingColor   = UIColor(red: 11.0/255.0, green: 39.0/255.0, blue: 0.0/255.0, alpha: 1.0)
+            }
         }
         if let topVC = getTopViewController() {
             topVC.present(self._navigationViewController!, animated: true, completion: nil)

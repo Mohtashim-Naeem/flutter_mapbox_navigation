@@ -357,6 +357,10 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         }
         let isDark = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
         let styles: [MapboxNavigation.Style] = isDark ? [nightStyle] : [dayStyle]
+        
+        // Fix 3: Apply UIAppearance proxies before NavigationViewController is initialized
+        styles.first?.apply()
+        
         let navigationOptions = NavigationOptions(styles: styles, navigationService: navigationService)
 
         // Remove previous navigation view and controller if any
@@ -372,6 +376,16 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
         _navigationViewController!.showsReportFeedback = _showReportFeedbackButton
         _navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
+        
+        // Fix 1: Override route line color to Epic green
+        if let navMapView = _navigationViewController!.navigationMapView {
+            navMapView.trafficUnknownColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            navMapView.trafficLowColor    = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            navMapView.trafficModerateColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            navMapView.trafficHeavyColor  = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            navMapView.trafficSevereColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            navMapView.routeCasingColor   = UIColor(red: 11.0/255.0, green: 39.0/255.0, blue: 0.0/255.0, alpha: 1.0)
+        }
 
         if let parentVC = getTopViewController() {
             parentVC.addChild(_navigationViewController!)

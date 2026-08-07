@@ -51,5 +51,9 @@ class CustomDayStyle: DayStyle {
         
         ManeuverView.appearance().primaryColor = textPrimary
         ManeuverView.appearance().secondaryColor = textPrimary
+        
+        // Floating action buttons (Light theme)
+        Button.appearance(whenContainedInInstancesOf: [FloatingStackView.self]).backgroundColor = UIColor(red: 234.0 / 255.0, green: 243.0 / 255.0, blue: 222.0 / 255.0, alpha: 1.0)
+        Button.appearance(whenContainedInInstancesOf: [FloatingStackView.self]).tintColor = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
     }
 }
