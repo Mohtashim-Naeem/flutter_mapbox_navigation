@@ -451,6 +451,13 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         applyToAllSubviews(of: navVC.view) { view in
             let typeName = String(describing: type(of: view))
             
+            if view.backgroundColor != nil && view.backgroundColor != .clear {
+                print("[EPIC_THEME_DIAGNOSTIC] View: \(typeName), bg: \(view.backgroundColor!)")
+            }
+            if let label = view as? UILabel {
+                print("[EPIC_THEME_DIAGNOSTIC] Label: \(typeName), text: '\(label.text ?? "nil")', textColor: \(label.textColor ?? .clear), bg: \(label.backgroundColor ?? .clear)")
+            }
+
             // 1. Unconditionally hide and remove report / feedback button (speech bubble icon)
             if typeName.contains("Report") || typeName.contains("Feedback") {
                 view.isHidden = true
