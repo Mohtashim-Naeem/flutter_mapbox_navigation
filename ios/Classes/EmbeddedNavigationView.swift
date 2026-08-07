@@ -452,13 +452,6 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             guard let self = self else { return }
             let typeName = String(describing: type(of: view))
             
-            if view.backgroundColor != nil && view.backgroundColor != .clear {
-                print("[EPIC_THEME_DIAGNOSTIC] View: \(typeName), bg: \(view.backgroundColor!)")
-            }
-            if let label = view as? UILabel {
-                print("[EPIC_THEME_DIAGNOSTIC] Label: \(typeName), text: '\(label.text ?? "nil")', textColor: \(label.textColor ?? .clear), bg: \(label.backgroundColor ?? .clear)")
-            }
-
             // 1. Unconditionally hide and remove report / feedback button (speech bubble icon)
             if typeName.contains("Report") || typeName.contains("Feedback") {
                 view.isHidden = true
@@ -473,7 +466,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                typeName.contains("ManeuverContainer") || typeName.contains("NextBanner") ||
                typeName.contains("NextStep") || typeName.contains("StatusView") ||
                typeName.contains("LanesView") || typeName.contains("LaneView") ||
-               typeName.contains("StepsBackground") || typeName.contains("StepsTableHeader") {
+               typeName.contains("StepsBackground") {
                 view.backgroundColor = bannerBg
             }
             
@@ -492,8 +485,6 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 if let cell = view as? UITableViewCell {
                     cell.backgroundColor = bannerBg
                     cell.contentView.backgroundColor = bannerBg
-                    cell.textLabel?.textColor = textColor
-                    cell.detailTextLabel?.textColor = textColor
                 }
             }
 
@@ -522,14 +513,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
             }
 
-            // 8. Labels - set clear background and correct text color
-            if let label = view as? UILabel {
-                label.backgroundColor = .clear
-                if typeName.contains("TimeRemaining") {
-                    label.textColor = brandGreen
-                } else {
-                    label.textColor = textColor
-                }
+            // 8. TimeRemainingLabel in bottom banner
+            if typeName.contains("TimeRemaining") {
+                (view as? UILabel)?.textColor = brandGreen
             }
             
             // 9. Close / Cancel / Dismiss buttons
