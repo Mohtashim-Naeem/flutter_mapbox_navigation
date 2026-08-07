@@ -224,6 +224,14 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
             self._navigationViewController!.showsReportFeedback = _showReportFeedbackButton
             self._navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
             
+            if !_showReportFeedbackButton {
+                self._navigationViewController?.floatingButtons = self._navigationViewController?.floatingButtons?.filter { button in
+                    let name = String(describing: type(of: button))
+                    let id = button.accessibilityIdentifier ?? ""
+                    return id != "feedbackButton" && !name.contains("Report") && !name.contains("Feedback")
+                }
+            }
+            
             // Fix 1: Override route line color to Epic green
             if let navMapView = self._navigationViewController!.navigationMapView {
                 navMapView.trafficUnknownColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
@@ -398,8 +406,8 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
         _showReportFeedbackButton = arguments?["showReportFeedbackButton"] as? Bool ?? _showReportFeedbackButton
         _showEndOfRouteFeedback = arguments?["showEndOfRouteFeedback"] as? Bool ?? _showEndOfRouteFeedback
         _enableOnMapTapCallback = arguments?["enableOnMapTapCallback"] as? Bool ?? _enableOnMapTapCallback
-        _mapStyleUrlDay = arguments?["mapStyleUrlDay"] as? String
-        _mapStyleUrlNight = arguments?["mapStyleUrlNight"] as? String
+        _mapStyleUrlDay = arguments?["mapStyleUrlDay"] as? String ?? _mapStyleUrlDay
+        _mapStyleUrlNight = arguments?["mapStyleUrlNight"] as? String ?? _mapStyleUrlNight
         _isDarkTheme = arguments?["isDarkTheme"] as? Bool ?? _isDarkTheme
         _arrivalRadius = arguments?["arrivalRadius"] as? Double
         _zoom = arguments?["zoom"] as? Double ?? _zoom

@@ -382,6 +382,14 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         _navigationViewController!.showsReportFeedback = _showReportFeedbackButton
         _navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
         
+        if !_showReportFeedbackButton {
+            _navigationViewController?.floatingButtons = _navigationViewController?.floatingButtons?.filter { button in
+                let name = String(describing: type(of: button))
+                let id = button.accessibilityIdentifier ?? ""
+                return id != "feedbackButton" && !name.contains("Report") && !name.contains("Feedback")
+            }
+        }
+        
         // Fix 1: Override route line color to Epic green
         if let navMapView = _navigationViewController!.navigationMapView {
             navMapView.trafficUnknownColor = UIColor(red: 97.0/255.0, green: 203.0/255.0, blue: 8.0/255.0, alpha: 1.0)
