@@ -398,9 +398,64 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             _navigationViewController!.view.translatesAutoresizingMaskIntoConstraints = false
             constraintsWithPaddingBetween(holderView: self.navigationMapView, topView: _navigationViewController!.view, padding: 0.0)
         }
+        
+        // Apply Epic theme directly to the live view hierarchy (UIAppearance is unreliable here)
+        let isDarkMode = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self = self, let navVC = self._navigationViewController else { return }
+            self.applyEpicThemeToNavVC(navVC, isDark: isDarkMode)
+        }
+        
         result(true)
 
     }
+
+    // ─── Epic Theme Direct Application ───────────────────────────────────────
+    /// UIAppearance is unreliable for Mapbox SDK views. This walks the live view
+    /// hierarchy directly and forces Epic colors onto every matching view.
+    func applyEpicThemeToNavVC(_ navVC: NavigationViewController, isDark: Bool) {
+        let darkestGreen = UIColor(red: 11.0/255, green: 39.0/255, blue: 0.0/255, alpha: 1)   // #0B2700
+        let darkSurface  = UIColor(red: 24.0/255, green: 56.0/255, blue: 20.0/255, alpha: 1)  // #183814
+        let lightSurface = UIColor(red: 255.0/255, green: 255.0/255, blue: 255.0/255, alpha: 1)
+        let maneuverBg   = UIColor(red: 249.0/255, green: 250.0/255, blue: 249.0/255, alpha: 1)
+        let brandGreen   = UIColor(red: 97.0/255, green: 203.0/255, blue: 8.0/255, alpha: 1)  // #61CB08
+        let textWhite    = UIColor.white
+        let textDark     = UIColor(red: 15.0/255, green: 18.0/255, blue: 16.0/255, alpha: 1)
+        
+        let bannerBg  = isDark ? darkestGreen : maneuverBg
+        let bottomBg  = isDark ? darkSurface  : lightSurface
+        let textColor = isDark ? textWhite    : textDark
+        
+        applyToAllSubviews(of: navVC.view) { view in
+            let typeName = String(describing: type(of: view))
+            switch typeName {
+            case "InstructionsBannerView", "TopBannerView", "StepInstructionsView",
+                 "InformationStackView", "ManeuverContainerView":
+                view.backgroundColor = bannerBg
+            case "BottomBannerView", "BottomPaddingView", "ArrivalView":
+                view.backgroundColor = bottomBg
+            case "TimeRemainingLabel":
+                (view as? UILabel)?.textColor = brandGreen
+            case "DistanceRemainingLabel", "ArrivalTimeLabel",
+                 "PrimaryLabel", "SecondaryLabel", "InstructionLabel",
+                 "TitleLabel", "SubtitleLabel", "WayNameLabel":
+                (view as? UILabel)?.textColor = textColor
+            case "FloatingButton":
+                view.backgroundColor = isDark ? darkSurface : UIColor(red: 234/255, green: 243/255, blue: 222/255, alpha: 1)
+                (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
+            default:
+                break
+            }
+        }
+    }
+    
+    private func applyToAllSubviews(of view: UIView, apply: (UIView) -> Void) {
+        apply(view)
+        for subview in view.subviews {
+            applyToAllSubviews(of: subview, apply: apply)
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     func constraintsWithPaddingBetween(holderView: UIView, topView: UIView, padding: CGFloat) {
         guard holderView.subviews.contains(topView) else {
