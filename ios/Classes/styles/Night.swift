@@ -54,7 +54,9 @@ class CustomNightStyle: NightStyle {
         ManeuverView.appearance().secondaryColor = textPrimary
         
         // Floating action buttons (Dark theme)
-        Button.appearance(whenContainedInInstancesOf: [FloatingStackView.self]).backgroundColor = UIColor(red: 24.0 / 255.0, green: 56.0 / 255.0, blue: 20.0 / 255.0, alpha: 1.0)
-        Button.appearance(whenContainedInInstancesOf: [FloatingStackView.self]).tintColor = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
+        if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIAppearanceContainer.Type {
+            UIButton.appearance(whenContainedInInstancesOf: [floatingButtonClass]).backgroundColor = UIColor(red: 24.0 / 255.0, green: 56.0 / 255.0, blue: 20.0 / 255.0, alpha: 1.0)
+            UIButton.appearance(whenContainedInInstancesOf: [floatingButtonClass]).tintColor = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
+        }
     }
 }
