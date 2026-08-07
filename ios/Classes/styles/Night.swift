@@ -37,9 +37,12 @@ class CustomNightStyle: NightStyle {
         let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
         let textPrimary = UIColor(red: 255.0 / 255.0, green: 255.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0)
 
+        InstructionsBannerView.appearance().backgroundColor = maneuverBg
+        StepInstructionsView.appearance().backgroundColor = maneuverBg
         TopBannerView.appearance().backgroundColor = maneuverBg
         BottomBannerView.appearance().backgroundColor = darkSurface
         BottomPaddingView.appearance().backgroundColor = darkSurface
+        
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
         ArrivalTimeLabel.appearance().textColor = textPrimary
@@ -54,9 +57,9 @@ class CustomNightStyle: NightStyle {
         ManeuverView.appearance().secondaryColor = textPrimary
         
         // Floating action buttons (Dark theme)
-        if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIAppearanceContainer.Type {
-            UIButton.appearance(whenContainedInInstancesOf: [floatingButtonClass]).backgroundColor = UIColor(red: 24.0 / 255.0, green: 56.0 / 255.0, blue: 20.0 / 255.0, alpha: 1.0)
-            UIButton.appearance(whenContainedInInstancesOf: [floatingButtonClass]).tintColor = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
+        if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {
+            floatingButtonClass.appearance().backgroundColor = darkSurface
+            floatingButtonClass.appearance().tintColor = brandGreen
         }
     }
 }

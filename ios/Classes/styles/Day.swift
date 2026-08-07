@@ -36,9 +36,12 @@ class CustomDayStyle: DayStyle {
         let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
         let textPrimary = UIColor(red: 15.0 / 255.0, green: 18.0 / 255.0, blue: 16.0 / 255.0, alpha: 1.0)
 
+        InstructionsBannerView.appearance().backgroundColor = maneuverBg
+        StepInstructionsView.appearance().backgroundColor = maneuverBg
         TopBannerView.appearance().backgroundColor = maneuverBg
         BottomBannerView.appearance().backgroundColor = lightSurface
         BottomPaddingView.appearance().backgroundColor = lightSurface
+        
         TimeRemainingLabel.appearance().textColor = brandGreen
         DistanceRemainingLabel.appearance().textColor = textPrimary
         ArrivalTimeLabel.appearance().textColor = textPrimary
@@ -53,9 +56,9 @@ class CustomDayStyle: DayStyle {
         ManeuverView.appearance().secondaryColor = textPrimary
         
         // Floating action buttons (Light theme)
-        if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIAppearanceContainer.Type {
-            UIButton.appearance(whenContainedInInstancesOf: [floatingButtonClass]).backgroundColor = UIColor(red: 234.0 / 255.0, green: 243.0 / 255.0, blue: 222.0 / 255.0, alpha: 1.0)
-            UIButton.appearance(whenContainedInInstancesOf: [floatingButtonClass]).tintColor = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
+        if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {
+            floatingButtonClass.appearance().backgroundColor = UIColor(red: 234.0 / 255.0, green: 243.0 / 255.0, blue: 222.0 / 255.0, alpha: 1.0)
+            floatingButtonClass.appearance().tintColor = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
         }
     }
 }
