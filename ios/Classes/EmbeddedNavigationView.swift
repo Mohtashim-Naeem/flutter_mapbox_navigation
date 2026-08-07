@@ -413,7 +413,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
     // ─── Epic Theme Direct Application ───────────────────────────────────────
     /// Direct view hierarchy traversal for Epic theme enforcement
-    func applyEpicThemeToNavVC(_ navVC: NavigationViewController, isDark: Bool) {
+    override func applyEpicThemeToNavVC(_ navVC: NavigationViewController, isDark: Bool) {
         let darkestGreen = UIColor(red: 11.0/255, green: 39.0/255, blue: 0.0/255, alpha: 1)   // #0B2700
         let darkSurface  = UIColor(red: 24.0/255, green: 56.0/255, blue: 20.0/255, alpha: 1)  // #183814
         let lightSurface = UIColor(red: 255.0/255, green: 255.0/255, blue: 255.0/255, alpha: 1)
