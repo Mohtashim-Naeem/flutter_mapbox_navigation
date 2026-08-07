@@ -230,9 +230,121 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
             }
         }
         if let topVC = getTopViewController() {
-            topVC.present(self._navigationViewController!, animated: true, completion: nil)
+            topVC.present(self._navigationViewController!, animated: true) { [weak self] in
+                guard let self = self, let navVC = self._navigationViewController else { return }
+                let isDarkMode = self._isDarkTheme || (self._mapStyleUrlDay?.lowercased().contains("dark") == true)
+                self.applyEpicThemeToNavVC(navVC, isDark: isDarkMode)
+            }
         }
     }
+    
+    // ─── Epic Theme Direct Application ───────────────────────────────────────
+    /// Direct view hierarchy traversal for Epic theme enforcement
+    func applyEpicThemeToNavVC(_ navVC: NavigationViewController, isDark: Bool) {
+        let darkestGreen = UIColor(red: 11.0/255, green: 39.0/255, blue: 0.0/255, alpha: 1)   // #0B2700
+        let darkSurface  = UIColor(red: 24.0/255, green: 56.0/255, blue: 20.0/255, alpha: 1)  // #183814
+        let lightSurface = UIColor(red: 255.0/255, green: 255.0/255, blue: 255.0/255, alpha: 1)
+        let maneuverBg   = UIColor(red: 249.0/255, green: 250.0/255, blue: 249.0/255, alpha: 1)
+        let brandGreen   = UIColor(red: 97.0/255, green: 203.0/255, blue: 8.0/255, alpha: 1)  // #61CB08
+        let textWhite    = UIColor.white
+        let textDark     = UIColor(red: 15.0/255, green: 18.0/255, blue: 16.0/255, alpha: 1)
+        
+        let bannerBg  = isDark ? darkestGreen : maneuverBg
+        let bottomBg  = isDark ? darkSurface  : lightSurface
+        let textColor = isDark ? textWhite    : textDark
+        
+        navVC.showsReportFeedback = _showReportFeedbackButton
+        
+        applyToAllSubviews(of: navVC.view) { view in
+            let typeName = String(describing: type(of: view))
+            
+            // 1. Hide report feedback button (chat icon) if disabled
+            if !_showReportFeedbackButton {
+                if typeName.contains("Report") || typeName.contains("Feedback") {
+                    view.isHidden = true
+                    view.alpha = 0
+                    return
+                }
+            }
+
+            // 2. Top banners, Sub maneuvers, Next step banners, Information stack
+            if typeName.contains("InstructionsBanner") || typeName.contains("TopBanner") ||
+               typeName.contains("StepInstructions") || typeName.contains("InformationStack") ||
+               typeName.contains("ManeuverContainer") || typeName.contains("NextBanner") ||
+               typeName.contains("NextStep") || typeName.contains("StatusView") ||
+               typeName.contains("LanesView") || typeName.contains("LaneView") {
+                view.backgroundColor = bannerBg
+            }
+            
+            // 3. Steps Table View (Expanded turn-by-turn list) & Cells
+            if typeName.contains("Steps") || typeName.contains("StepTable") || view is UITableView {
+                view.backgroundColor = bannerBg
+                if let tableView = view as? UITableView {
+                    tableView.backgroundColor = bannerBg
+                    tableView.separatorColor = isDark ? darkSurface : UIColor.lightGray
+                }
+            }
+            if view is UITableViewCell || typeName.contains("StepCell") || typeName.contains("StepTableViewCell") {
+                view.backgroundColor = bannerBg
+                if let cell = view as? UITableViewCell {
+                    cell.backgroundColor = bannerBg
+                    cell.contentView.backgroundColor = bannerBg
+                    cell.textLabel?.textColor = textColor
+                    cell.detailTextLabel?.textColor = textColor
+                }
+            }
+
+            // 4. Bottom banners & footer bars (including Close button bar)
+            if typeName.contains("BottomBanner") || typeName.contains("BottomPadding") ||
+               typeName.contains("ArrivalView") || typeName.contains("Footer") {
+                view.backgroundColor = bottomBg
+            }
+
+            // 5. Resume Button (recenter button when map panned)
+            if typeName.contains("ResumeButton") {
+                view.backgroundColor = isDark ? darkSurface : lightSurface
+                if let button = view as? UIButton {
+                    button.tintColor = isDark ? brandGreen : darkestGreen
+                    button.setTitleColor(isDark ? brandGreen : darkestGreen, for: .normal)
+                }
+            }
+
+            // 6. Floating action buttons (Audio, Recenter, Overview)
+            if typeName.contains("FloatingButton") {
+                if !_showReportFeedbackButton && (typeName.contains("Report") || typeName.contains("Feedback")) {
+                    view.isHidden = true
+                    return
+                }
+                view.backgroundColor = isDark ? darkSurface : UIColor(red: 234/255, green: 243/255, blue: 222/255, alpha: 1)
+                (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
+            }
+
+            // 7. Labels & Text Colors
+            if let label = view as? UILabel {
+                if typeName.contains("TimeRemaining") {
+                    label.textColor = brandGreen
+                } else {
+                    label.textColor = textColor
+                }
+            }
+            
+            // 8. Close / Cancel / Dismiss buttons
+            if let button = view as? UIButton {
+                if button.title(for: .normal) == "Close" || button.title(for: .normal) == "Cancel" || typeName.contains("Dismiss") || typeName.contains("Cancel") {
+                    button.setTitleColor(isDark ? brandGreen : textDark, for: .normal)
+                    button.tintColor = isDark ? brandGreen : textDark
+                }
+            }
+        }
+    }
+    
+    private func applyToAllSubviews(of view: UIView, apply: (UIView) -> Void) {
+        apply(view)
+        for subview in view.subviews {
+            applyToAllSubviews(of: subview, apply: apply)
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
     
     func setNavigationOptions(wayPoints: [Waypoint]) {
         var mode: ProfileIdentifier = .automobileAvoidingTraffic
@@ -457,6 +569,9 @@ extension NavigationFactory : NavigationViewControllerDelegate {
         _distanceRemaining = progress.distanceRemaining
         _durationRemaining = progress.durationRemaining
         sendEvent(eventType: MapBoxEventType.navigation_running)
+        
+        let isDarkMode = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
+        applyEpicThemeToNavVC(navigationViewController, isDark: isDarkMode)
         //_currentLegDescription =  progress.currentLeg.description
         if(_eventSink != nil)
         {

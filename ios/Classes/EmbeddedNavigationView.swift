@@ -328,6 +328,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
     func startEmbeddedNavigation(arguments: NSDictionary?, result: @escaping FlutterResult) {
         guard let response = self.routeResponse else { return }
+        parseFlutterArguments(arguments: arguments)
         self.navigationMapView.removeRoutes()
         self.navigationMapView.removeWaypoints()
         let navLocationManager = self._simulateRoute ? SimulatedLocationManager(route: response.routes!.first!) : NavigationLocationManager()
@@ -399,9 +400,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
             constraintsWithPaddingBetween(holderView: self.navigationMapView, topView: _navigationViewController!.view, padding: 0.0)
         }
         
-        // Apply Epic theme directly to the live view hierarchy (UIAppearance is unreliable here)
+        // Apply Epic theme directly to the live view hierarchy
         let isDarkMode = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
             guard let self = self, let navVC = self._navigationViewController else { return }
             self.applyEpicThemeToNavVC(navVC, isDark: isDarkMode)
         }
@@ -411,8 +412,7 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
     }
 
     // ─── Epic Theme Direct Application ───────────────────────────────────────
-    /// UIAppearance is unreliable for Mapbox SDK views. This walks the live view
-    /// hierarchy directly and forces Epic colors onto every matching view.
+    /// Direct view hierarchy traversal for Epic theme enforcement
     func applyEpicThemeToNavVC(_ navVC: NavigationViewController, isDark: Bool) {
         let darkestGreen = UIColor(red: 11.0/255, green: 39.0/255, blue: 0.0/255, alpha: 1)   // #0B2700
         let darkSurface  = UIColor(red: 24.0/255, green: 56.0/255, blue: 20.0/255, alpha: 1)  // #183814
@@ -426,25 +426,87 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         let bottomBg  = isDark ? darkSurface  : lightSurface
         let textColor = isDark ? textWhite    : textDark
         
+        navVC.showsReportFeedback = _showReportFeedbackButton
+        
         applyToAllSubviews(of: navVC.view) { view in
             let typeName = String(describing: type(of: view))
-            switch typeName {
-            case "InstructionsBannerView", "TopBannerView", "StepInstructionsView",
-                 "InformationStackView", "ManeuverContainerView":
+            
+            // 1. Hide report feedback button (chat icon) if disabled
+            if !_showReportFeedbackButton {
+                if typeName.contains("Report") || typeName.contains("Feedback") {
+                    view.isHidden = true
+                    view.alpha = 0
+                    return
+                }
+            }
+
+            // 2. Top banners, Sub maneuvers, Next step banners, Information stack
+            if typeName.contains("InstructionsBanner") || typeName.contains("TopBanner") ||
+               typeName.contains("StepInstructions") || typeName.contains("InformationStack") ||
+               typeName.contains("ManeuverContainer") || typeName.contains("NextBanner") ||
+               typeName.contains("NextStep") || typeName.contains("StatusView") ||
+               typeName.contains("LanesView") || typeName.contains("LaneView") {
                 view.backgroundColor = bannerBg
-            case "BottomBannerView", "BottomPaddingView", "ArrivalView":
+            }
+            
+            // 3. Steps Table View (Expanded turn-by-turn list) & Cells
+            if typeName.contains("Steps") || typeName.contains("StepTable") || view is UITableView {
+                view.backgroundColor = bannerBg
+                if let tableView = view as? UITableView {
+                    tableView.backgroundColor = bannerBg
+                    tableView.separatorColor = isDark ? darkSurface : UIColor.lightGray
+                }
+            }
+            if view is UITableViewCell || typeName.contains("StepCell") || typeName.contains("StepTableViewCell") {
+                view.backgroundColor = bannerBg
+                if let cell = view as? UITableViewCell {
+                    cell.backgroundColor = bannerBg
+                    cell.contentView.backgroundColor = bannerBg
+                    cell.textLabel?.textColor = textColor
+                    cell.detailTextLabel?.textColor = textColor
+                }
+            }
+
+            // 4. Bottom banners & footer bars (including Close button bar)
+            if typeName.contains("BottomBanner") || typeName.contains("BottomPadding") ||
+               typeName.contains("ArrivalView") || typeName.contains("Footer") {
                 view.backgroundColor = bottomBg
-            case "TimeRemainingLabel":
-                (view as? UILabel)?.textColor = brandGreen
-            case "DistanceRemainingLabel", "ArrivalTimeLabel",
-                 "PrimaryLabel", "SecondaryLabel", "InstructionLabel",
-                 "TitleLabel", "SubtitleLabel", "WayNameLabel":
-                (view as? UILabel)?.textColor = textColor
-            case "FloatingButton":
+            }
+
+            // 5. Resume Button (recenter button when map panned)
+            if typeName.contains("ResumeButton") {
+                view.backgroundColor = isDark ? darkSurface : lightSurface
+                if let button = view as? UIButton {
+                    button.tintColor = isDark ? brandGreen : darkestGreen
+                    button.setTitleColor(isDark ? brandGreen : darkestGreen, for: .normal)
+                }
+            }
+
+            // 6. Floating action buttons (Audio, Recenter, Overview)
+            if typeName.contains("FloatingButton") {
+                if !_showReportFeedbackButton && (typeName.contains("Report") || typeName.contains("Feedback")) {
+                    view.isHidden = true
+                    return
+                }
                 view.backgroundColor = isDark ? darkSurface : UIColor(red: 234/255, green: 243/255, blue: 222/255, alpha: 1)
                 (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
-            default:
-                break
+            }
+
+            // 7. Labels & Text Colors
+            if let label = view as? UILabel {
+                if typeName.contains("TimeRemaining") {
+                    label.textColor = brandGreen
+                } else {
+                    label.textColor = textColor
+                }
+            }
+            
+            // 8. Close / Cancel / Dismiss buttons
+            if let button = view as? UIButton {
+                if button.title(for: .normal) == "Close" || button.title(for: .normal) == "Cancel" || typeName.contains("Dismiss") || typeName.contains("Cancel") {
+                    button.setTitleColor(isDark ? brandGreen : textDark, for: .normal)
+                    button.tintColor = isDark ? brandGreen : textDark
+                }
             }
         }
     }
@@ -519,6 +581,11 @@ extension FlutterMapboxNavigationView : NavigationServiceDelegate {
         _distanceRemaining = progress.distanceRemaining
         _durationRemaining = progress.durationRemaining
         sendEvent(eventType: MapBoxEventType.navigation_running)
+        
+        if let navVC = _navigationViewController {
+            let isDarkMode = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
+            applyEpicThemeToNavVC(navVC, isDark: isDarkMode)
+        }
         //_currentLegDescription =  progress.currentLeg.description
         if(_eventSink != nil)
         {

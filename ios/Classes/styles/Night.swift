@@ -38,6 +38,7 @@ class CustomNightStyle: NightStyle {
         let textPrimary = UIColor(red: 255.0 / 255.0, green: 255.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0)
 
         InstructionsBannerView.appearance().backgroundColor = maneuverBg
+        NextBannerView.appearance().backgroundColor = maneuverBg
         StepInstructionsView.appearance().backgroundColor = maneuverBg
         TopBannerView.appearance().backgroundColor = maneuverBg
         BottomBannerView.appearance().backgroundColor = darkSurface
@@ -55,6 +56,9 @@ class CustomNightStyle: NightStyle {
         
         ManeuverView.appearance().primaryColor = textPrimary
         ManeuverView.appearance().secondaryColor = textPrimary
+        
+        ResumeButton.appearance().backgroundColor = darkSurface
+        ResumeButton.appearance().tintColor = brandGreen
         
         // Floating action buttons (Dark theme)
         if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {

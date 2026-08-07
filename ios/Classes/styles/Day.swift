@@ -37,6 +37,7 @@ class CustomDayStyle: DayStyle {
         let textPrimary = UIColor(red: 15.0 / 255.0, green: 18.0 / 255.0, blue: 16.0 / 255.0, alpha: 1.0)
 
         InstructionsBannerView.appearance().backgroundColor = maneuverBg
+        NextBannerView.appearance().backgroundColor = maneuverBg
         StepInstructionsView.appearance().backgroundColor = maneuverBg
         TopBannerView.appearance().backgroundColor = maneuverBg
         BottomBannerView.appearance().backgroundColor = lightSurface
@@ -54,6 +55,9 @@ class CustomDayStyle: DayStyle {
         
         ManeuverView.appearance().primaryColor = textPrimary
         ManeuverView.appearance().secondaryColor = textPrimary
+        
+        ResumeButton.appearance().backgroundColor = lightSurface
+        ResumeButton.appearance().tintColor = brandGreen
         
         // Floating action buttons (Light theme)
         if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {
