@@ -177,9 +177,9 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
                     if(strongSelf._mapStyleUrlDay != nil){
                         dayStyle = CustomDayStyle(url: strongSelf._mapStyleUrlDay)
                     }
-                    let nightStyle = CustomNightStyle()
+                    var nightStyle = CustomNightStyle()
                     if(strongSelf._mapStyleUrlNight != nil){
-                        nightStyle.mapStyleURL = URL(string: strongSelf._mapStyleUrlNight!)!
+                        nightStyle = CustomNightStyle(url: strongSelf._mapStyleUrlNight)
                     }
                     let isDark = strongSelf._isDarkTheme || (strongSelf._mapStyleUrlDay?.lowercased().contains("dark") == true)
                     let styles: [MapboxNavigation.Style] = isDark ? [nightStyle, dayStyle] : [dayStyle, nightStyle]
@@ -216,6 +216,11 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
             self._navigationViewController!.delegate = self
             self._navigationViewController!.routeLineTracksTraversal = true
             self._navigationViewController!.navigationMapView!.localizeLabels()
+            
+            let isDark = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
+            if let styleUrl = isDark ? _mapStyleUrlNight : _mapStyleUrlDay, let url = URL(string: styleUrl) {
+                self._navigationViewController?.navigationMapView?.mapView.mapboxMap.style.uri = StyleURI(url: url)
+            }
             self._navigationViewController!.showsReportFeedback = _showReportFeedbackButton
             self._navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
             

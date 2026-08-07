@@ -4,26 +4,28 @@ import MapboxMaps
 
 class CustomDayStyle: DayStyle {
 
+    static var customUrl: String?
+
     required init() {
         super.init()
         initStyle()
     }
 
     init(url: String?){
+        CustomDayStyle.customUrl = url
         super.init()
         initStyle()
-        if(url != nil)
-        {
-            mapStyleURL = URL(string: url!) ?? URL(string: StyleURI.navigationDay.rawValue)!
-            previewMapStyleURL = mapStyleURL
-        }
     }
 
     func initStyle()
     {
-        // Use a custom map style.
-        mapStyleURL = URL(string: StyleURI.navigationDay.rawValue)!
-        previewMapStyleURL = mapStyleURL
+        if let urlStr = CustomDayStyle.customUrl, let url = URL(string: urlStr) {
+            mapStyleURL = url
+            previewMapStyleURL = url
+        } else {
+            mapStyleURL = URL(string: StyleURI.navigationDay.rawValue)!
+            previewMapStyleURL = mapStyleURL
+        }
 
         // Specify that the style should be used during the day.
         styleType = .day

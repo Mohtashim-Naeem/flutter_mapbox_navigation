@@ -5,28 +5,30 @@ import MapboxNavigation
 
 class CustomNightStyle: NightStyle {
 
+    static var customUrl: String?
+
     required init() {
         super.init()
         initStyle()
     }
 
     init(url: String?){
+        CustomNightStyle.customUrl = url
         super.init()
         initStyle()
-        if(url != nil)
-        {
-            mapStyleURL = URL(string: url!) ?? URL(string: StyleURI.navigationNight.rawValue)!
-            previewMapStyleURL = mapStyleURL
-        }
     }
 
     func initStyle()
     {
-        // Use a custom map style.
-        mapStyleURL = URL(string: StyleURI.navigationNight.rawValue)!
-        previewMapStyleURL = mapStyleURL
+        if let urlStr = CustomNightStyle.customUrl, let url = URL(string: urlStr) {
+            mapStyleURL = url
+            previewMapStyleURL = url
+        } else {
+            mapStyleURL = URL(string: StyleURI.navigationNight.rawValue)!
+            previewMapStyleURL = mapStyleURL
+        }
 
-        // Specify that the style should be used during the day.
+        // Specify that the style should be used during the night.
         styleType = .night
     }
 

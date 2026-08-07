@@ -352,9 +352,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         if(_mapStyleUrlDay != nil){
             dayStyle = CustomDayStyle(url: _mapStyleUrlDay)
         }
-        let nightStyle = CustomNightStyle()
+        var nightStyle = CustomNightStyle()
         if(_mapStyleUrlNight != nil){
-            nightStyle.mapStyleURL = URL(string: _mapStyleUrlNight!)!
+            nightStyle = CustomNightStyle(url: _mapStyleUrlNight)
         }
         let isDark = _isDarkTheme || (_mapStyleUrlDay?.lowercased().contains("dark") == true)
         let styles: [MapboxNavigation.Style] = isDark ? [nightStyle] : [dayStyle]
@@ -374,6 +374,10 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
         _navigationViewController!.delegate = self
         _navigationViewController!.routeLineTracksTraversal = true
         _navigationViewController!.navigationMapView?.mapView.presentsWithTransaction = true
+
+        if let styleUrl = isDark ? _mapStyleUrlNight : _mapStyleUrlDay, let url = URL(string: styleUrl) {
+            _navigationViewController?.navigationMapView?.mapView.mapboxMap.style.uri = StyleURI(url: url)
+        }
 
         _navigationViewController!.showsReportFeedback = _showReportFeedbackButton
         _navigationViewController!.showsEndOfRouteFeedback = _showEndOfRouteFeedback
