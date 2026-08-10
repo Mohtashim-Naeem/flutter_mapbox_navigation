@@ -1,8 +1,20 @@
+import UIKit
 import MapboxMaps
 import MapboxNavigation
-import MapboxMaps
 
 class CustomDayStyle: DayStyle {
+
+    /// Must match `MapboxNavigation.Style.traitCollection` exactly.
+    ///
+    /// Every appearance proxy inside DayStyle/NightStyle is registered with
+    /// `appearance(for: traitCollection, ...)`. A trait-scoped proxy always outranks the
+    /// plain `appearance()` proxy, so overrides written as `Foo.appearance().bar = ...`
+    /// are silently ignored on device — which is why the steps list kept the stock SDK
+    /// colours while the top banner looked correct.
+    private static let epicTraitCollection = UITraitCollection(traitsFrom: [
+        UITraitCollection(userInterfaceIdiom: .phone),
+        UITraitCollection(userInterfaceIdiom: .pad),
+    ])
 
     required init() {
         super.init()
@@ -30,43 +42,83 @@ class CustomDayStyle: DayStyle {
 
     override func apply() {
         super.apply()
+
+        let traits = CustomDayStyle.epicTraitCollection
+
         let lightSurface = UIColor(red: 255.0 / 255.0, green: 255.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0)
         let maneuverBg = UIColor(red: 249.0 / 255.0, green: 250.0 / 255.0, blue: 249.0 / 255.0, alpha: 1.0)
         let brandGreen = UIColor(red: 97.0 / 255.0, green: 203.0 / 255.0, blue: 8.0 / 255.0, alpha: 1.0)
+        let darkestGreen = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
         let textPrimary = UIColor(red: 15.0 / 255.0, green: 18.0 / 255.0, blue: 16.0 / 255.0, alpha: 1.0)
+        let textSecondary = UIColor(red: 15.0 / 255.0, green: 18.0 / 255.0, blue: 16.0 / 255.0, alpha: 0.7)
 
-        InstructionsBannerView.appearance().backgroundColor = maneuverBg
-        NextBannerView.appearance().backgroundColor = maneuverBg
-        StepInstructionsView.appearance().backgroundColor = maneuverBg
-        TopBannerView.appearance().backgroundColor = maneuverBg
-        BottomBannerView.appearance().backgroundColor = lightSurface
-        BottomPaddingView.appearance().backgroundColor = lightSurface
-        
-        StepsBackgroundView.appearance().backgroundColor = maneuverBg
-        StepTableViewCell.appearance().backgroundColor = maneuverBg
-        
-        TimeRemainingLabel.appearance().textColor = brandGreen
-        DistanceRemainingLabel.appearance().textColor = textPrimary
-        ArrivalTimeLabel.appearance().textColor = textPrimary
-        
-        PrimaryLabel.appearance().textColor = textPrimary
-        SecondaryLabel.appearance().textColor = textPrimary
-        InstructionLabel.appearance().textColor = textPrimary
-        TitleLabel.appearance().textColor = textPrimary
-        SubtitleLabel.appearance().textColor = textPrimary
-        
-        ManeuverView.appearance().primaryColor = textPrimary
-        ManeuverView.appearance().secondaryColor = textPrimary
-        
-        ResumeButton.appearance().backgroundColor = lightSurface
-        ResumeButton.appearance().tintColor = brandGreen
-        DismissButton.appearance().tintColor = brandGreen
-        CancelButton.appearance().tintColor = brandGreen
-        
+        // --- Background colors ---
+        InstructionsBannerView.appearance(for: traits).backgroundColor = maneuverBg
+        NextBannerView.appearance(for: traits).backgroundColor = maneuverBg
+        StepInstructionsView.appearance(for: traits).backgroundColor = maneuverBg
+        TopBannerView.appearance(for: traits).backgroundColor = maneuverBg
+        BottomBannerView.appearance(for: traits).backgroundColor = lightSurface
+        BottomPaddingView.appearance(for: traits).backgroundColor = lightSurface
+
+        StepsBackgroundView.appearance(for: traits).backgroundColor = maneuverBg
+        StepTableViewCell.appearance(for: traits).backgroundColor = maneuverBg
+
+        // --- Row separators inside the steps list ---
+        SeparatorView.appearance(for: traits).backgroundColor = UIColor.black.withAlphaComponent(0.12)
+
+        // --- Bottom banner labels ---
+        TimeRemainingLabel.appearance(for: traits).trafficUnknownColor = brandGreen
+        TimeRemainingLabel.appearance(for: traits).trafficLowColor = brandGreen
+        TimeRemainingLabel.appearance(for: traits).trafficModerateColor = brandGreen
+        TimeRemainingLabel.appearance(for: traits).trafficHeavyColor = brandGreen
+        TimeRemainingLabel.appearance(for: traits).trafficSevereColor = brandGreen
+        DistanceRemainingLabel.appearance(for: traits).normalTextColor = textPrimary
+        ArrivalTimeLabel.appearance(for: traits).normalTextColor = textPrimary
+
+        // --- Instruction labels (use normalTextColor — SDK builds attributedText from this) ---
+        PrimaryLabel.appearance(for: traits).normalTextColor = textPrimary
+        SecondaryLabel.appearance(for: traits).normalTextColor = textPrimary
+        InstructionLabel.appearance(for: traits).normalTextColor = textPrimary
+        TitleLabel.appearance(for: traits).normalTextColor = textPrimary
+        SubtitleLabel.appearance(for: traits).normalTextColor = textPrimary
+
+        // --- Top banner: labels scoped to InstructionsBannerView ---
+        PrimaryLabel.appearance(for: traits, whenContainedInInstancesOf: [InstructionsBannerView.self]).normalTextColor = textPrimary
+        SecondaryLabel.appearance(for: traits, whenContainedInInstancesOf: [InstructionsBannerView.self]).normalTextColor = textSecondary
+
+        // --- Steps list: labels scoped to StepInstructionsView ---
+        PrimaryLabel.appearance(for: traits, whenContainedInInstancesOf: [StepInstructionsView.self]).normalTextColor = textPrimary
+        SecondaryLabel.appearance(for: traits, whenContainedInInstancesOf: [StepInstructionsView.self]).normalTextColor = textSecondary
+
+        // --- Distance labels (use valueTextColor / unitTextColor, NOT textColor) ---
+        DistanceLabel.appearance(for: traits).valueTextColor = textPrimary
+        DistanceLabel.appearance(for: traits).unitTextColor = textSecondary
+        DistanceLabel.appearance(for: traits, whenContainedInInstancesOf: [InstructionsBannerView.self]).valueTextColor = textPrimary
+        DistanceLabel.appearance(for: traits, whenContainedInInstancesOf: [InstructionsBannerView.self]).unitTextColor = textSecondary
+        DistanceLabel.appearance(for: traits, whenContainedInInstancesOf: [StepInstructionsView.self]).valueTextColor = textPrimary
+        DistanceLabel.appearance(for: traits, whenContainedInInstancesOf: [StepInstructionsView.self]).unitTextColor = textSecondary
+
+        // --- Maneuver arrows ---
+        ManeuverView.appearance(for: traits).primaryColor = textPrimary
+        ManeuverView.appearance(for: traits).secondaryColor = textSecondary
+        ManeuverView.appearance(for: traits, whenContainedInInstancesOf: [InstructionsBannerView.self]).primaryColor = textPrimary
+        ManeuverView.appearance(for: traits, whenContainedInInstancesOf: [InstructionsBannerView.self]).secondaryColor = textSecondary
+        ManeuverView.appearance(for: traits, whenContainedInInstancesOf: [StepInstructionsView.self]).primaryColor = textPrimary
+        ManeuverView.appearance(for: traits, whenContainedInInstancesOf: [StepInstructionsView.self]).secondaryColor = textSecondary
+
+        // --- Buttons ---
+        ResumeButton.appearance(for: traits).backgroundColor = lightSurface
+        ResumeButton.appearance(for: traits).tintColor = brandGreen
+        // "Close" bar under the steps list
+        DismissButton.appearance(for: traits).backgroundColor = lightSurface
+        DismissButton.appearance(for: traits).textColor = darkestGreen
+        DismissButton.appearance(for: traits).tintColor = darkestGreen
+        CancelButton.appearance(for: traits).tintColor = brandGreen
+
         // Floating action buttons (Light theme)
         if let floatingButtonClass = NSClassFromString("MapboxNavigation.FloatingButton") as? UIButton.Type {
-            floatingButtonClass.appearance().backgroundColor = UIColor(red: 234.0 / 255.0, green: 243.0 / 255.0, blue: 222.0 / 255.0, alpha: 1.0)
-            floatingButtonClass.appearance().tintColor = UIColor(red: 11.0 / 255.0, green: 39.0 / 255.0, blue: 0.0 / 255.0, alpha: 1.0)
+            floatingButtonClass.appearance(for: traits).backgroundColor = UIColor(red: 234.0 / 255.0, green: 243.0 / 255.0, blue: 222.0 / 255.0, alpha: 1.0)
+            floatingButtonClass.appearance(for: traits).tintColor = darkestGreen
         }
     }
 }

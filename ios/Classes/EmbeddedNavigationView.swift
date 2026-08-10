@@ -475,22 +475,40 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 view.backgroundColor = bannerBg
                 if let tableView = view as? UITableView {
                     tableView.backgroundColor = bannerBg
-                    tableView.separatorColor = isDark ? darkSurface : UIColor.lightGray
+                    tableView.backgroundView = nil
+                    // StepsViewController deliberately sets separatorColor = .clear because each
+                    // StepTableViewCell draws its own SeparatorView. Re-enabling UIKit separators
+                    // paints ghost lines over the list, so keep them off.
+                    tableView.separatorColor = .clear
+                    tableView.separatorStyle = .none
                 }
             }
-            
-            // 4. Cells in steps list
-            if view is UITableViewCell || typeName.contains("StepCell") || typeName.contains("StepTableViewCell") {
+
+            // 3b. The SDK's own per-row separators
+            if view is SeparatorView {
+                view.backgroundColor = isDark
+                    ? UIColor.white.withAlphaComponent(0.15)
+                    : UIColor.black.withAlphaComponent(0.12)
+            }
+
+            // 4. Cells in steps list.
+            //    IMPORTANT: StepTableViewCell adds its `instructionsView` (turn arrow, street
+            //    name, distance) directly to the cell — NOT to contentView. Giving contentView
+            //    an opaque colour covers the whole instruction and the row renders blank.
+            //    Colour the cell itself and keep contentView transparent.
+            if let cell = view as? UITableViewCell {
+                cell.backgroundColor = bannerBg
+                cell.contentView.backgroundColor = .clear
+                cell.backgroundView?.backgroundColor = bannerBg
+                cell.selectedBackgroundView?.backgroundColor = bannerBg
+            } else if typeName.contains("StepCell") || typeName.contains("StepTableViewCell") {
                 view.backgroundColor = bannerBg
-                if let cell = view as? UITableViewCell {
-                    cell.backgroundColor = bannerBg
-                    cell.contentView.backgroundColor = bannerBg
-                }
             }
 
             // 5. Bottom banners & footer bars (including Close button bar at bottom of steps list)
             if typeName.contains("BottomBanner") || typeName.contains("BottomPadding") ||
-               typeName.contains("ArrivalView") || typeName.contains("Footer") || typeName.contains("StepsTableFooter") {
+               typeName.contains("ArrivalView") || typeName.contains("Footer") ||
+               typeName.contains("StepsTableFooter") || typeName.contains("DismissButton") {
                 view.backgroundColor = bottomBg
             }
 
@@ -513,14 +531,45 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
                 (view as? UIButton)?.tintColor = isDark ? brandGreen : darkestGreen
             }
 
-            // 8. Labels - ensure visible text color against new backgrounds
-            if let label = view as? UILabel {
-                label.backgroundColor = .clear
-                if typeName.contains("TimeRemaining") {
-                    label.textColor = brandGreen
-                } else {
-                    label.textColor = textColor
+            // 8. Labels - use the SDK's actual styling properties, not UILabel.textColor
+            //    StylableLabel subclasses build NSAttributedStrings from normalTextColor,
+            //    so setting plain textColor is overridden immediately by the SDK.
+            if let instructionLabel = view as? InstructionLabel {
+                // InstructionLabel renders its NSAttributedString from `textColor`, but
+                // StylableLabel.update() assigns `textColor` *after* that render runs.
+                // Setting normalTextColor alone therefore bakes in the previous colour and
+                // the street name stays invisible. Set both, then force a re-render.
+                instructionLabel.backgroundColor = .clear
+                if instructionLabel.normalTextColor != textColor || instructionLabel.textColor != textColor {
+                    instructionLabel.textColor = textColor
+                    instructionLabel.normalTextColor = textColor
+                    instructionLabel.update()
                 }
+            } else if let distanceLabel = view as? DistanceLabel {
+                distanceLabel.backgroundColor = .clear
+                distanceLabel.valueTextColor = textColor
+                distanceLabel.unitTextColor = textColor.withAlphaComponent(0.7)
+            } else if let timeLabel = view as? TimeRemainingLabel {
+                timeLabel.backgroundColor = .clear
+                timeLabel.trafficUnknownColor = brandGreen
+                timeLabel.trafficLowColor = brandGreen
+                timeLabel.trafficModerateColor = brandGreen
+                timeLabel.trafficHeavyColor = brandGreen
+                timeLabel.trafficSevereColor = brandGreen
+            } else if let stylableLabel = view as? StylableLabel {
+                stylableLabel.backgroundColor = .clear
+                stylableLabel.normalTextColor = textColor
+            } else if let label = view as? UILabel {
+                label.backgroundColor = .clear
+                label.textColor = textColor
+            }
+            
+            // 8b. Maneuver turn arrows - ensure visible against dark backgrounds
+            if let maneuverView = view as? ManeuverView {
+                maneuverView.backgroundColor = .clear
+                maneuverView.primaryColor = textColor
+                maneuverView.secondaryColor = textColor.withAlphaComponent(0.3)
+                maneuverView.setNeedsDisplay()
             }
             
             // 9. Close / Cancel / Dismiss buttons
