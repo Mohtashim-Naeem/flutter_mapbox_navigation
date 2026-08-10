@@ -99,7 +99,15 @@ class MapBoxNavigationViewController {
   /// starts listening for events
   Future<void> initialize() async {
     if (_isDisposed) return;
-    _routeEventSubscription ??= _streamRouteEvent?.listen(_onProgressData);
+    // `cancelOnError: false` matters: a transient platform error must not silently kill the
+    // subscription and leave navigation running with no events reaching Dart.
+    _routeEventSubscription ??= _streamRouteEvent?.listen(
+      _onProgressData,
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('flutter_mapbox_navigation: route event stream error: $error');
+      },
+      cancelOnError: false,
+    );
   }
 
   /// Clear the built route and resets the map
@@ -176,21 +184,34 @@ class MapBoxNavigationViewController {
     return _eventChannel
         .receiveBroadcastStream()
         .where((dynamic event) => event != null && event is String)
-        .map((dynamic event) => _parseRouteEvent(event as String));
+        .map((dynamic event) => _parseRouteEvent(event as String))
+        .where((RouteEvent? event) => event != null)
+        .cast<RouteEvent>();
   }
 
-  RouteEvent _parseRouteEvent(String jsonString) {
-    RouteEvent event;
-    final map = json.decode(jsonString) as Map<String, dynamic>;
-    final progressEvent = RouteProgressEvent.fromJson(map);
-    if (progressEvent.isProgressEvent!) {
-      event = RouteEvent(
-        eventType: MapBoxEvent.progress_change,
-        data: progressEvent,
-      );
-    } else {
-      event = RouteEvent.fromJson(map);
+  /// Returns `null` for anything the native side sends that we cannot decode.
+  ///
+  /// A single malformed payload used to throw straight out of the stream as an unhandled
+  /// async `FormatException` — and because the native side can emit events far faster than
+  /// once a second (off-route fires continuously under mock locations), that turned one bad
+  /// event into a flood. Navigation should never fall over because of one unreadable event.
+  RouteEvent? _parseRouteEvent(String jsonString) {
+    try {
+      final decoded = json.decode(jsonString);
+      if (decoded is! Map<String, dynamic>) return null;
+
+      final progressEvent = RouteProgressEvent.fromJson(decoded);
+      if (progressEvent.isProgressEvent ?? false) {
+        return RouteEvent(
+          eventType: MapBoxEvent.progress_change,
+          data: progressEvent,
+        );
+      }
+      return RouteEvent.fromJson(decoded);
+    } catch (e, stackTrace) {
+      debugPrint('flutter_mapbox_navigation: dropped unparseable route event: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      return null;
     }
-    return event;
   }
 }

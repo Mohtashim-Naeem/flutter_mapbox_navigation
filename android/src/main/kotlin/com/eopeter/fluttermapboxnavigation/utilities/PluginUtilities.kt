@@ -9,6 +9,7 @@ import com.eopeter.fluttermapboxnavigation.FlutterMapboxNavigationPlugin
 import com.eopeter.fluttermapboxnavigation.models.MapBoxEvents
 import com.eopeter.fluttermapboxnavigation.models.MapBoxRouteProgressEvent
 import io.flutter.plugin.common.MethodCall
+import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.io.Serializable
@@ -41,13 +42,39 @@ class PluginUtilities {
                     "}"
         }
 
+        /**
+         * Builds the event envelope sent over the event channel.
+         *
+         * Two bugs used to live here and both produced malformed JSON that blew up as an
+         * unhandled `FormatException` in Dart:
+         *
+         *  1. Events in [rawJsonEvents] interpolate [data] unquoted because it is expected to
+         *     already be JSON. Callers like `sendEvent(MapBoxEvents.USER_OFF_ROUTE)` pass no
+         *     data at all, which produced `{"eventType":"user_off_route","data":}`. Off-route
+         *     fires constantly with mock/fake locations, so this was easy to hit.
+         *  2. The string branch interpolated [data] straight into quotes, so any `"`,
+         *     backslash or newline in the payload (route-build error messages, for example)
+         *     also produced invalid JSON.
+         *
+         * [JSONObject.quote] handles the escaping; blank raw payloads become `null`.
+         */
         fun formatEventJson(event: MapBoxEvents, data: String = ""): String {
-            return if (MapBoxEvents.MILESTONE_EVENT == event || event == MapBoxEvents.USER_OFF_ROUTE || event == MapBoxEvents.ROUTE_BUILT || event == MapBoxEvents.ON_MAP_TAP) "{" +
+            val rawJsonEvents = setOf(
+                MapBoxEvents.MILESTONE_EVENT,
+                MapBoxEvents.USER_OFF_ROUTE,
+                MapBoxEvents.ROUTE_BUILT,
+                MapBoxEvents.ON_MAP_TAP
+            )
+
+            val payload = if (rawJsonEvents.contains(event)) {
+                if (data.isBlank()) "null" else data
+            } else {
+                JSONObject.quote(data)
+            }
+
+            return "{" +
                     "  \"eventType\": \"${event.value}\"," +
-                    "  \"data\": $data" +
-                    "}" else "{" +
-                    "  \"eventType\": \"${event.value}\"," +
-                    "  \"data\": \"$data\"" +
+                    "  \"data\": $payload" +
                     "}"
         }
 
