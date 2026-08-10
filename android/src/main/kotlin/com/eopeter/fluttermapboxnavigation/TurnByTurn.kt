@@ -44,6 +44,8 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+
+
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import android.graphics.Color
@@ -436,7 +438,10 @@ open class TurnByTurn(
             val ctx = this@TurnByTurn.activity
             if (ctx != null) {
                 routeLineOptions = MapboxRouteLineOptions.Builder(ctx)
+                    .withVanishingRouteLineEnabled(true)
                     .withRouteLineResources(
+
+
                         RouteLineResources.Builder()
                             .routeLineColorResources(
                                 RouteLineColorResources.Builder()
@@ -449,6 +454,7 @@ open class TurnByTurn(
                             .build()
                     )
                     .build()
+
                 
                 routeArrowOptions = com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder(ctx)
                     .withAboveLayerId(com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)

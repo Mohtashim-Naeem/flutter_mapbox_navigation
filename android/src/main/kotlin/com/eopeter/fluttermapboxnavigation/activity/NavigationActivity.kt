@@ -45,6 +45,8 @@ import com.mapbox.navigation.ui.maneuver.model.ManeuverSubOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineResources
+
+
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import android.graphics.Color
@@ -233,7 +235,10 @@ class NavigationActivity : AppCompatActivity() {
             mapStyleUriNight = styleUrlNight
             
             routeLineOptions = MapboxRouteLineOptions.Builder(this@NavigationActivity)
+                .withVanishingRouteLineEnabled(true)
                 .withRouteLineResources(
+
+
                     RouteLineResources.Builder()
                         .routeLineColorResources(
                             RouteLineColorResources.Builder()
@@ -246,6 +251,7 @@ class NavigationActivity : AppCompatActivity() {
                         .build()
                 )
                 .build()
+
             
             routeArrowOptions = com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions.Builder(this@NavigationActivity)
                 .withAboveLayerId(com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)
