@@ -1,9 +1,33 @@
 import Flutter
 import UIKit
+import AVFoundation
 import MapboxMaps
 import MapboxDirections
 import MapboxCoreNavigation
 import MapboxNavigation
+
+/// `FlutterEventChannel.setStreamHandler(_:)` retains its handler **strongly**.
+/// Passing `self` therefore creates a `self -> eventChannel -> self` retain cycle, so the
+/// platform view is never deallocated when Flutter disposes it — `deinit` (and with it
+/// `cleanUp()`) never runs, and the Mapbox trip session, location manager and voice
+/// controller keep running after the Flutter screen is gone. Routing through this weak
+/// proxy lets the view actually deallocate.
+private final class WeakStreamHandlerProxy: NSObject, FlutterStreamHandler {
+    private weak var target: NavigationFactory?
+
+    init(target: NavigationFactory) {
+        self.target = target
+    }
+
+    func onListen(withArguments arguments: Any?,
+                  eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        return target?.onListen(withArguments: arguments, eventSink: events)
+    }
+
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        return target?.onCancel(withArguments: arguments)
+    }
+}
 
 public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformView
 {
@@ -40,7 +64,8 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
         super.init()
 
-        self.eventChannel.setStreamHandler(self)
+        // Weak proxy — passing `self` here leaks the whole navigation session (see above).
+        self.eventChannel.setStreamHandler(WeakStreamHandlerProxy(target: self))
 
         self.channel.setMethodCallHandler { [weak self](call, result) in
 
@@ -178,6 +203,12 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
     func cleanUp() {
         stopThemeReapplyTimer()
+
+        // Silence voice guidance first. `navigationService.stop()` ends the trip session but
+        // does NOT cancel an utterance that is already queued or being spoken, which is how
+        // turn announcements survive the screen being torn down.
+        silenceVoiceGuidance()
+
         passiveLocationProvider.stopUpdatingLocation()
         locationManager.stopUpdatingLocation()
 
@@ -206,6 +237,9 @@ public class FlutterMapboxNavigationView : NavigationFactory, FlutterPlatformVie
 
         eventChannel.setStreamHandler(nil)
         channel.setMethodCallHandler(nil)
+
+        // Hand the audio session back so the driver's music / other apps resume.
+        try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
     }
 
     func clearRoute(arguments: NSDictionary?, result: @escaping FlutterResult)

@@ -275,6 +275,18 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
         themeReapplyTimer?.invalidate()
         themeReapplyTimer = nil
     }
+
+    /// Immediately stops any spoken instruction that is queued or mid-playback.
+    ///
+    /// `NavigationService.stop()` / `endNavigation(feedback:)` end the trip session but leave
+    /// the `RouteVoiceController`'s synthesizer alone, so an already-dispatched announcement
+    /// keeps playing after the navigation screen is gone.
+    func silenceVoiceGuidance() {
+        guard let voiceController = _navigationViewController?.voiceController else { return }
+        voiceController.speechSynthesizer.muted = true
+        voiceController.speechSynthesizer.interruptSpeaking()
+        voiceController.speechSynthesizer.stopSpeaking()
+    }
     
     // ─── Epic Theme Direct Application ───────────────────────────────────────
     /// Direct view hierarchy traversal for Epic theme enforcement
@@ -536,6 +548,7 @@ public class NavigationFactory : NSObject, FlutterStreamHandler
     func endNavigation(result: FlutterResult?)
     {
         stopThemeReapplyTimer()
+        silenceVoiceGuidance()
         sendEvent(eventType: MapBoxEventType.navigation_finished)
         if(self._navigationViewController != nil)
         {
