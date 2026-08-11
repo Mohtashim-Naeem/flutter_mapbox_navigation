@@ -124,11 +124,11 @@
         <item name="backgroundTint">@color/epic_surface_dark</item>
         <item name="android:backgroundTint">@color/epic_surface_dark</item>
         <item name="cardBackgroundColor">@color/epic_surface_dark</item>
-        <item name="iconTint">@color/epic_accent</item>
-        <item name="android:iconTint">@color/epic_accent</item>
-        <item name="android:tint">@color/epic_accent</item>
-        <item name="tint">@color/epic_accent</item>
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="iconTint">@color/epic_text_primary_dark</item>
+        <item name="android:iconTint">@color/epic_text_primary_dark</item>
+        <item name="android:tint">@color/epic_text_primary_dark</item>
+        <item name="tint">@color/epic_text_primary_dark</item>
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
     </style>
 
     <style name="EpicCameraButtonStyleLight" parent="DropInStyleCameraModeButton">
@@ -147,11 +147,11 @@
         <item name="backgroundTint">@color/epic_surface_dark</item>
         <item name="android:backgroundTint">@color/epic_surface_dark</item>
         <item name="cardBackgroundColor">@color/epic_surface_dark</item>
-        <item name="iconTint">@color/epic_accent</item>
-        <item name="android:iconTint">@color/epic_accent</item>
-        <item name="android:tint">@color/epic_accent</item>
-        <item name="tint">@color/epic_accent</item>
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="iconTint">@color/epic_text_primary_dark</item>
+        <item name="android:iconTint">@color/epic_text_primary_dark</item>
+        <item name="android:tint">@color/epic_text_primary_dark</item>
+        <item name="tint">@color/epic_text_primary_dark</item>
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
     </style>
 
     <style name="EpicAudioButtonStyleLight" parent="DropInStyleAudioGuidanceButton">
@@ -170,11 +170,11 @@
         <item name="backgroundTint">@color/epic_surface_dark</item>
         <item name="android:backgroundTint">@color/epic_surface_dark</item>
         <item name="cardBackgroundColor">@color/epic_surface_dark</item>
-        <item name="iconTint">@color/epic_accent</item>
-        <item name="android:iconTint">@color/epic_accent</item>
-        <item name="android:tint">@color/epic_accent</item>
-        <item name="tint">@color/epic_accent</item>
-        <item name="android:textColor">@color/epic_accent</item>
+        <item name="iconTint">@color/epic_text_primary_dark</item>
+        <item name="android:iconTint">@color/epic_text_primary_dark</item>
+        <item name="android:tint">@color/epic_text_primary_dark</item>
+        <item name="tint">@color/epic_text_primary_dark</item>
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
     </style>
 
     <style name="EpicRecenterButtonStyleLight" parent="DropInStyleRecenterButton">

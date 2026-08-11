@@ -642,11 +642,23 @@ class NavigationActivity : AppCompatActivity() {
         viewGroup.postDelayed(runnable, 3000)
     }
 
+    /**
+     * Tints the three floating action buttons (camera mode, audio guidance, recenter).
+     *
+     * This used to recolour **every** `ImageView` and `TextView` in the whole navigation
+     * view — the button name check only gated the background, not the icon and text tint.
+     * That repainted the maneuver arrow, the street name, the step distance, the trip
+     * progress row and the speed limit in the accent colour, overriding every style in
+     * styles.xml. Views created after the last delayed pass (the upcoming-maneuver rows)
+     * escaped it, which is why only part of the screen looked wrong.
+     *
+     * The traversal now stops at each action button and only tints that button's subtree.
+     */
     private fun tintFloatingActionButtons(viewGroup: android.view.View, isDark: Boolean) {
         val iconColor = if (isDark) {
-            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_accent)
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_text_primary_dark)
         } else {
-            android.graphics.Color.parseColor("#0B2700")
+            androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_maneuver_bg_dark)
         }
         val bgColor = if (isDark) {
             androidx.core.content.ContextCompat.getColor(viewGroup.context, R.color.epic_surface_dark)
@@ -657,42 +669,45 @@ class NavigationActivity : AppCompatActivity() {
         val iconTintList = android.content.res.ColorStateList.valueOf(iconColor)
         val bgTintList = android.content.res.ColorStateList.valueOf(bgColor)
 
+        fun tintButtonSubtree(v: android.view.View) {
+            if (v is android.widget.ImageView) {
+                try {
+                    v.imageTintList = iconTintList
+                    v.drawable?.mutate()?.setTint(iconColor)
+                    v.setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN)
+                } catch (e: Exception) {}
+            }
+            if (v is android.widget.TextView) {
+                try {
+                    v.setTextColor(iconColor)
+                } catch (e: Exception) {}
+            }
+            if (v is android.view.ViewGroup) {
+                for (i in 0 until v.childCount) {
+                    tintButtonSubtree(v.getChildAt(i))
+                }
+            }
+        }
+
         fun traverseAndApply(v: android.view.View) {
             val name = try { v.resources.getResourceEntryName(v.id) } catch (e: Exception) { "" }
+            // Deliberately narrow. Generic terms like "button"/"action" also match info-panel
+            // containers, which is how this escaped its intended scope in the first place.
             val isActionButton = name.contains("camera", ignoreCase = true) ||
                                  name.contains("audio", ignoreCase = true) ||
                                  name.contains("recenter", ignoreCase = true) ||
                                  name.contains("compass", ignoreCase = true) ||
                                  name.contains("sound", ignoreCase = true) ||
                                  name.contains("mute", ignoreCase = true) ||
-                                 name.contains("volume", ignoreCase = true) ||
-                                 name.contains("action", ignoreCase = true) ||
-                                 name.contains("button", ignoreCase = true) ||
-                                 name.contains("fab", ignoreCase = true)
+                                 name.contains("volume", ignoreCase = true)
 
             if (isActionButton) {
                 try {
                     v.backgroundTintList = bgTintList
                     v.background?.mutate()?.setTint(bgColor)
                 } catch (e: Exception) {}
-            }
-
-            if (v is android.widget.ImageView) {
-                try {
-                    v.imageTintList = iconTintList
-                    v.drawable?.mutate()?.setTint(iconColor)
-                    v.setColorFilter(iconColor, android.graphics.PorterDuff.Mode.SRC_IN)
-                    androidx.core.graphics.drawable.DrawableCompat.setTint(
-                        androidx.core.graphics.drawable.DrawableCompat.wrap(v.drawable!!).mutate(),
-                        iconColor
-                    )
-                } catch (e: Exception) {}
-            }
-
-            if (v is android.widget.TextView) {
-                try {
-                    v.setTextColor(iconColor)
-                } catch (e: Exception) {}
+                tintButtonSubtree(v)
+                return
             }
 
             if (v is android.view.ViewGroup) {
