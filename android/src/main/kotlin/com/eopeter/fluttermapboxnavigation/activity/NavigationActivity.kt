@@ -225,6 +225,18 @@ class NavigationActivity : AppCompatActivity() {
                 
             destinationMarkerAnnotationOptions = PointAnnotationOptions()
                 .withIconColor("#61CB08")
+
+            // These three were never set, so they kept the SDK defaults — a grey "Arrived"
+            // headline that vanishes against the dark info panel, and a white road-name pill
+            // with dark text floating over the dark map.
+            arrivalTextAppearance =
+                if (isDark) R.style.EpicArrivalTextDark else R.style.EpicArrivalTextLight
+            poiNameTextAppearance =
+                if (isDark) R.style.EpicPoiNameTextDark else R.style.EpicPoiNameTextLight
+            roadNameTextAppearance =
+                if (isDark) R.style.EpicRoadNameTextDark else R.style.EpicRoadNameTextLight
+            roadNameBackground =
+                if (isDark) R.drawable.epic_road_name_bg_dark else R.drawable.epic_road_name_bg_light
         }
         tintDragHandle(binding.navigationView, isDark)
         tintFloatingActionButtons(binding.navigationView, isDark)

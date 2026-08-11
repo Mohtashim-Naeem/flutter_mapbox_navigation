@@ -49,6 +49,38 @@
         <item name="android:tint">@color/epic_text_primary_dark</item>
     </style>
 
+    <!--
+        Info-panel "Arrived" headline. Without `arrivalTextAppearance` the SDK falls back to
+        its own default (a mid-grey), which is unreadable on the dark green info panel.
+    -->
+    <style name="EpicArrivalTextLight" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/epic_text_primary_light</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="EpicArrivalTextDark" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Destination / POI name shown in the info panel above the trip progress row. -->
+    <style name="EpicPoiNameTextLight" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_light</item>
+    </style>
+
+    <style name="EpicPoiNameTextDark" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
+    </style>
+
+    <!-- The floating road-name pill ("Karsaz Service Road"). -->
+    <style name="EpicRoadNameTextLight" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_light</item>
+    </style>
+
+    <style name="EpicRoadNameTextDark" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/epic_text_primary_dark</item>
+    </style>
+
     <style name="EpicManeuverTextAppearanceLight" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@color/epic_maneuver_bg_dark</item>
     </style>

@@ -31,7 +31,9 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.arrival.ArrivalOptions
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.*
@@ -518,6 +520,18 @@ open class TurnByTurn(
                 cameraModeButtonStyle = if (isDark) R.style.EpicCameraButtonStyleDark else R.style.EpicCameraButtonStyleLight
                 audioGuidanceButtonStyle = if (isDark) R.style.EpicAudioButtonStyleDark else R.style.EpicAudioButtonStyleLight
                 recenterButtonStyle = if (isDark) R.style.EpicRecenterButtonStyleDark else R.style.EpicRecenterButtonStyleLight
+
+                // These three were never set, so they kept the SDK defaults — a grey
+                // "Arrived" headline that vanishes against the dark info panel, and a
+                // white road-name pill with dark text floating over the dark map.
+                arrivalTextAppearance =
+                    if (isDark) R.style.EpicArrivalTextDark else R.style.EpicArrivalTextLight
+                poiNameTextAppearance =
+                    if (isDark) R.style.EpicPoiNameTextDark else R.style.EpicPoiNameTextLight
+                roadNameTextAppearance =
+                    if (isDark) R.style.EpicRoadNameTextDark else R.style.EpicRoadNameTextLight
+                roadNameBackground =
+                    if (isDark) R.drawable.epic_road_name_bg_dark else R.drawable.epic_road_name_bg_light
             }
         }
         tintDragHandle(this@TurnByTurn.binding.navigationView, isDark)
@@ -535,6 +549,10 @@ open class TurnByTurn(
         if (arrivalRadius != null && arrivalRadius > 0) {
             this.customArrivalRadius = arrivalRadius
             this.hasTriggeredArrival = false
+            // Arguments can be parsed after registerObservers() has already run, so push the
+            // radius into the SDK here too — otherwise the UI would keep its default arrival
+            // threshold for this session.
+            applyArrivalRadiusToSdk()
         }
 
         val br = arguments["bearing"] as? Double
@@ -583,7 +601,34 @@ open class TurnByTurn(
         }
     }
 
+    /**
+     * Pushes the Flutter-supplied `arrivalRadius` into the SDK's own arrival detection.
+     *
+     * Without this, `arrivalRadius` only drove the plugin's private trigger in
+     * [routeProgressObserver], while Mapbox's drop-in UI kept using its default
+     * `ArrivalOptions` (~5 seconds remaining). That is why the Flutter toast appeared while
+     * the info panel still read "< 1 min". Setting an [ArrivalController] makes
+     * `onFinalDestinationArrival` — and therefore the "Arrived" panel — fire at the same
+     * distance, so the event and the UI stay in step.
+     *
+     * Safe to call repeatedly; a null radius leaves the SDK on its defaults.
+     */
+    private fun applyArrivalRadiusToSdk() {
+        val radius = this.customArrivalRadius ?: return
+        if (radius <= 0) return
+
+        val navigation = MapboxNavigationApp.current() ?: return
+        navigation.setArrivalController(object : ArrivalController {
+            override fun arrivalOptions(): ArrivalOptions =
+                ArrivalOptions.Builder().arrivalInMeters(radius).build()
+
+            // Keep the SDK's default behaviour of auto-advancing multi-leg routes.
+            override fun navigateNextRouteLeg(routeLegProgress: RouteLegProgress): Boolean = true
+        })
+    }
+
     open fun registerObservers() {
+        applyArrivalRadiusToSdk()
         MapboxNavigationApp.current()?.registerBannerInstructionsObserver(this.bannerInstructionObserver)
         MapboxNavigationApp.current()?.registerVoiceInstructionsObserver(this.voiceInstructionObserver)
         MapboxNavigationApp.current()?.registerOffRouteObserver(this.offRouteObserver)
