@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="18dp"
+    android:paddingEnd="18dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="14dp">
+
+    <FrameLayout
+        android:id="@+id/epicExitButton"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:background="@drawable/epic_circle_button_dark"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="@string/epic_end_navigation">
+
+        <ImageView
+            android:id="@+id/epicExitIcon"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/epic_ic_close" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="true">
+
+            <TextView
+                android:id="@+id/epicEtaValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.01"
+                android:textSize="34sp"
+                android:textStyle="normal"
+                tools:text="9" />
+
+            <TextView
+                android:id="@+id/epicEtaUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:includeFontPadding="false"
+                android:textSize="18sp"
+                tools:text="min" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/epicEtaSecondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:textSize="14sp"
+            tools:text="350 ft · 12:57 pm" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/epicRightSlot"
+        android:layout_width="46dp"
+        android:layout_height="46dp" />
+
+</LinearLayout>
