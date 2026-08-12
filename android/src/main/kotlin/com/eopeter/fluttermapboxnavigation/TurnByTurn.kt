@@ -14,6 +14,7 @@ import com.eopeter.fluttermapboxnavigation.models.MapBoxRouteProgressEvent
 import com.eopeter.fluttermapboxnavigation.models.Waypoint
 import com.eopeter.fluttermapboxnavigation.models.WaypointSet
 import com.eopeter.fluttermapboxnavigation.utilities.CustomInfoPanelEndNavButtonBinder
+import com.eopeter.fluttermapboxnavigation.utilities.EpicTripProgressBinder
 import com.eopeter.fluttermapboxnavigation.utilities.PluginUtilities
 import com.google.gson.Gson
 import com.mapbox.maps.Style
@@ -532,6 +533,15 @@ open class TurnByTurn(
                     if (isDark) R.drawable.epic_road_name_bg_dark else R.drawable.epic_road_name_bg_light
             }
         }
+        // Swap MapboxTripProgressView for the Epic layout: exit button left, ETA centred.
+        this@TurnByTurn.binding.navigationView.customizeViewBinders {
+            infoPanelTripProgressBinder = EpicTripProgressBinder(
+                isDark = isDark,
+                isImperial = this@TurnByTurn.navigationVoiceUnits == DirectionsCriteria.IMPERIAL,
+                onExit = { this@TurnByTurn.finishNavigation() }
+            )
+        }
+
         tintDragHandle(this@TurnByTurn.binding.navigationView, isDark)
         tintFloatingActionButtons(this@TurnByTurn.binding.navigationView, isDark)
 

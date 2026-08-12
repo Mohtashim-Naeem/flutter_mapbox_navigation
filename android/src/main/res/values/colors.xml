@@ -29,4 +29,18 @@
 
     <!-- Shared Accent -->
     <color name="epic_accent">#61CB08</color>
+
+    <!-- Trip progress bar. Alpha steps give the 3:1 hierarchy between the ETA numeral,
+         its unit, and the distance/arrival line. -->
+    <color name="epic_eta_primary_dark">#FFFFFFFF</color>
+    <color name="epic_eta_unit_dark">#B8FFFFFF</color>
+    <color name="epic_eta_secondary_dark">#9EFFFFFF</color>
+    <color name="epic_eta_icon_dark">#D9FFFFFF</color>
+    <color name="epic_eta_stroke_dark">#38FFFFFF</color>
+
+    <color name="epic_eta_primary_light">#FF173404</color>
+    <color name="epic_eta_unit_light">#B3173404</color>
+    <color name="epic_eta_secondary_light">#99173404</color>
+    <color name="epic_eta_icon_light">#D9173404</color>
+    <color name="epic_eta_stroke_light">#33173404</color>
 </resources>
