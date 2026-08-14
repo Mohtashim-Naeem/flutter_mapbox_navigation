@@ -1,8 +1,23 @@
-[![Pub][pub_badge]][pub] [![BuyMeACoffee][buy_me_a_coffee_badge]][buy_me_a_coffee]
+[![Portfolio](https://img.shields.io/badge/Portfolio-mohtashimnaeem.dev-007ACC?style=for-the-badge&logo=google-chrome&logoColor=white)](https://mohtashimnaeem.dev/)
+[![Contact](https://img.shields.io/badge/Contact_Lead_Developer-mohtashimnaeemstm%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mohtashimnaeemstm@gmail.com)
 
 # flutter_mapbox_navigation
 
 Add Turn By Turn Navigation to Your Flutter Application Using MapBox. Never leave your app when you need to navigate your users to a location.
+
+---
+
+> ### 🚀 Custom Navigation & Full-Stack Mobile App Solutions
+> 
+> Looking to implement turn-by-turn navigation, real-time tracking, custom Mapbox SDKs, or high-performance mobile apps for your enterprise?
+> 
+> **Mohtashim Naeem** provides specialized mobile app engineering, navigation architecture, and custom software solutions tailored for fleet logistics, driver apps, and enterprise platforms.
+> 
+> * 🌐 **Portfolio & Projects:** [mohtashimnaeem.dev](https://mohtashimnaeem.dev/)
+> * 📧 **Direct Contact & Inquiries:** [mohtashimnaeemstm@gmail.com](mailto:mohtashimnaeemstm@gmail.com)
+> * 💼 **Services:** Flutter/iOS/Android Development, Custom Mapbox & Routing Integrations, Fleet Dispatch Systems, Turnkey Mobile Apps.
+
+---
 
 ## Features
 
@@ -230,8 +245,13 @@ Add the following to your `info.plist` file
 * [DONE] Embeddable Navigation View 
 * Offline Routing
 
+## 📩 Contact & Mobile Solutions
+
+For custom feature development, enterprise integration, bug fixes, or dedicated mobile application development (Flutter, iOS, Android):
+
+* 📧 **Email:** [mohtashimnaeemstm@gmail.com](mailto:mohtashimnaeemstm@gmail.com)
+* 🌐 **Portfolio:** [mohtashimnaeem.dev](https://mohtashimnaeem.dev/)
+
 <!-- Links -->
 [pub_badge]: https://img.shields.io/pub/v/flutter_mapbox_navigation.svg
 [pub]: https://pub.dev/packages/flutter_mapbox_navigation
-[buy_me_a_coffee]: https://www.buymeacoffee.com/eopeter
-[buy_me_a_coffee_badge]: https://img.buymeacoffee.com/button-api/?text=Donate&emoji=&slug=eopeter&button_colour=29b6f6&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00

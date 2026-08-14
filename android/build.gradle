@@ -2,7 +2,7 @@ group 'com.eopeter.fluttermapboxnavigation'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '2.0.20'
+    ext.kotlin_version = '2.2.20'
     ext.android_gradle_version = '8.6.0'
     repositories {
         google()
@@ -87,10 +87,10 @@ android {
 }
 
 dependencies {
-    // Mapbox Navigation SDK
-    implementation "com.mapbox.navigation:copilot:2.21.0"
-    implementation "com.mapbox.navigation:ui-app:2.21.0"
-    implementation "com.mapbox.navigation:ui-dropin:2.21.0"
+    // Mapbox Navigation SDK (ndk27 artifacts support 16 KB memory page sizes)
+    implementation "com.mapbox.navigation:copilot-ndk27:2.21.0"
+    implementation "com.mapbox.navigation:ui-app-ndk27:2.21.0"
+    implementation "com.mapbox.navigation:ui-dropin-ndk27:2.21.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.google.code.gson:gson:2.8.9'
