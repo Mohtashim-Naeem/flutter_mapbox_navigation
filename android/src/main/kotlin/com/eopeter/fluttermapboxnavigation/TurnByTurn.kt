@@ -14,6 +14,7 @@ import com.eopeter.fluttermapboxnavigation.models.MapBoxRouteProgressEvent
 import com.eopeter.fluttermapboxnavigation.models.Waypoint
 import com.eopeter.fluttermapboxnavigation.models.WaypointSet
 import com.eopeter.fluttermapboxnavigation.utilities.CustomInfoPanelEndNavButtonBinder
+import com.eopeter.fluttermapboxnavigation.utilities.EpicArrivalHeaderBinder
 import com.eopeter.fluttermapboxnavigation.utilities.EpicTripProgressBinder
 import com.eopeter.fluttermapboxnavigation.utilities.PluginUtilities
 import com.google.gson.Gson
@@ -363,7 +364,13 @@ open class TurnByTurn(
     private fun finishNavigation(isOffRouted: Boolean = false) {
         MapboxNavigationApp.current()?.stopTripSession()
         this.isNavigationCanceled = true
-        sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
+        // A trip the driver actually completed is not a cancellation. `hasTriggeredArrival` is
+        // set by either the SDK's ArrivalObserver or the custom arrivalRadius check, so this
+        // covers both the arrival header's close button and an early in-radius arrival.
+        sendEvent(
+            if (this.hasTriggeredArrival) MapBoxEvents.NAVIGATION_FINISHED
+            else MapBoxEvents.NAVIGATION_CANCELLED
+        )
     }
 
     fun shutdownNavigation(result: MethodChannel.Result? = null) {
@@ -538,6 +545,12 @@ open class TurnByTurn(
             infoPanelTripProgressBinder = EpicTripProgressBinder(
                 isDark = isDark,
                 isImperial = this@TurnByTurn.navigationVoiceUnits == DirectionsCriteria.IMPERIAL,
+                onExit = { this@TurnByTurn.finishNavigation() }
+            )
+            // The arrival header is a different layout that does NOT include trip progress,
+            // so without this the close button disappears the moment the driver arrives.
+            infoPanelHeaderArrivalBinder = EpicArrivalHeaderBinder(
+                isDark = isDark,
                 onExit = { this@TurnByTurn.finishNavigation() }
             )
         }
