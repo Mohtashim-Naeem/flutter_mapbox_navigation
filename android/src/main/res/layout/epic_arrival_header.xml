@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Arrival state of the info panel.
+
+    Deliberately mirrors epic_trip_progress.xml: same 46dp circular exit button on the left,
+    same 18dp horizontal padding, same 46dp spacer on the right. That keeps the close button
+    pinned to the identical pixel position when the panel switches from active guidance to
+    arrival, so it reads as the text changing rather than the button moving.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="18dp"
+    android:paddingEnd="18dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="14dp">
+
+    <FrameLayout
+        android:id="@+id/epicArrivalExitButton"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:background="@drawable/epic_circle_button_dark"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="@string/epic_end_navigation">
+
+        <ImageView
+            android:id="@+id/epicArrivalExitIcon"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/epic_ic_close" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/epicArrivalTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            tools:text="Arrived" />
+
+        <TextView
+            android:id="@+id/epicArrivalSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="123 Main Street"
+            tools:visibility="visible" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/epicArrivalRightSlot"
+        android:layout_width="46dp"
+        android:layout_height="46dp" />
+
+</LinearLayout>

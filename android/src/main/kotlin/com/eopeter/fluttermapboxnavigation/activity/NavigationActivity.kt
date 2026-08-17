@@ -17,6 +17,7 @@ import com.eopeter.fluttermapboxnavigation.models.MapBoxRouteProgressEvent
 import com.eopeter.fluttermapboxnavigation.models.Waypoint
 import com.eopeter.fluttermapboxnavigation.models.WaypointSet
 import com.eopeter.fluttermapboxnavigation.utilities.CustomInfoPanelEndNavButtonBinder
+import com.eopeter.fluttermapboxnavigation.utilities.EpicArrivalHeaderBinder
 import com.eopeter.fluttermapboxnavigation.utilities.EpicTripProgressBinder
 import com.eopeter.fluttermapboxnavigation.utilities.PluginUtilities
 import com.google.gson.Gson
@@ -126,10 +127,12 @@ class NavigationActivity : AppCompatActivity() {
             binding.navigationView.registerMapObserver(onMapClick)
         }
         val act = this
-        // Add custom view binders
+        // Add custom view binders.
+        // onExit is wired explicitly: the binder's fallback branch calls stopTripSession() +
+        // finish() without emitting anything, so Flutter never learned navigation had ended.
         binding.navigationView.customizeViewBinders {
             infoPanelEndNavigationButtonBinder =
-                CustomInfoPanelEndNavButtonBinder(act)
+                CustomInfoPanelEndNavButtonBinder(act) { endNavigationAndFinish() }
         }
 
         MapboxNavigationApp.current()?.registerBannerInstructionsObserver(this.bannerInstructionObserver)
@@ -246,11 +249,13 @@ class NavigationActivity : AppCompatActivity() {
                 isDark = isDark,
                 isImperial = FlutterMapboxNavigationPlugin.navigationVoiceUnits ==
                     DirectionsCriteria.IMPERIAL,
-                onExit = {
-                    MapboxNavigationApp.current()?.stopTripSession()
-                    sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
-                    finish()
-                }
+                onExit = { endNavigationAndFinish() }
+            )
+            // The arrival header is a different layout that does NOT include trip progress,
+            // so without this the close button disappears the moment the driver arrives.
+            infoPanelHeaderArrivalBinder = EpicArrivalHeaderBinder(
+                isDark = isDark,
+                onExit = { endNavigationAndFinish() }
             )
         }
 
@@ -330,6 +335,24 @@ class NavigationActivity : AppCompatActivity() {
             isNavigationInProgress = false
             sendEvent(MapBoxEvents.NAVIGATION_CANCELLED)
         }
+    }
+
+    /**
+     * Single exit path for every dismiss control in the info panel: the Epic close button on the
+     * trip progress row, the same button on the arrival header, and the SDK end-navigation button.
+     *
+     * A trip the driver actually completed is reported as NAVIGATION_FINISHED rather than
+     * NAVIGATION_CANCELLED — `hasTriggeredArrival` is set by either the ArrivalObserver or the
+     * custom arrivalRadius check, so both arrival routes are covered.
+     */
+    private fun endNavigationAndFinish() {
+        isNavigationInProgress = false
+        MapboxNavigationApp.current()?.stopTripSession()
+        sendEvent(
+            if (hasTriggeredArrival) MapBoxEvents.NAVIGATION_FINISHED
+            else MapBoxEvents.NAVIGATION_CANCELLED
+        )
+        finish()
     }
 
     private fun requestRoutes(waypointSet: WaypointSet) {
