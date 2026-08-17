@@ -67,30 +67,7 @@ class EmbeddedNavigationMapView(
             }
         } catch (_: Exception) {}
 
-        // Unregister all navigation observers (location, route progress, etc.)
-        try {
-            unregisterObservers()
-        } catch (_: Exception) {}
-
-        // Stop the active trip session to halt simulated/real location updates
-        // and prevent background coroutines from firing after the view is destroyed.
-        try {
-            MapboxNavigationApp.current()?.stopTripSession()
-        } catch (_: Exception) {}
-
-        // Clear the event sink so no further events are sent to the Flutter side
-        // after the platform view is disposed.
-        try {
-            FlutterMapboxNavigationPlugin.eventSink = null
-        } catch (_: Exception) {}
-
-        // Null out the method/event channels to prevent late method calls
-        try {
-            methodChannel?.setMethodCallHandler(null)
-            eventChannel?.setStreamHandler(null)
-            methodChannel = null
-            eventChannel = null
-        } catch (_: Exception) {}
+        shutdownNavigation()
     }
 
     /**
