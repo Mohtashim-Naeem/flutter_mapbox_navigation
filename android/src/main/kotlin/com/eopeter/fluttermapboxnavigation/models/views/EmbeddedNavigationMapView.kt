@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.view.View
 import com.eopeter.fluttermapboxnavigation.TurnByTurn
+import com.eopeter.fluttermapboxnavigation.FlutterMapboxNavigationPlugin
 import com.eopeter.fluttermapboxnavigation.databinding.NavigationActivityBinding
 import com.eopeter.fluttermapboxnavigation.models.MapBoxEvents
 import com.mapbox.geojson.Point
@@ -11,6 +12,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.dropin.map.MapViewObserver
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -59,9 +61,12 @@ class EmbeddedNavigationMapView(
     }
 
     override fun dispose() {
-        if ((this.arguments?.get("enableOnMapTapCallback") as? Boolean) == true) {
-            this.binding.navigationView.unregisterMapObserver(onMapClick)
-        }
+        try {
+            if ((this.arguments?.get("enableOnMapTapCallback") as? Boolean) == true) {
+                this.binding.navigationView.unregisterMapObserver(onMapClick)
+            }
+        } catch (_: Exception) {}
+
         shutdownNavigation()
     }
 
