@@ -95,6 +95,7 @@ open class TurnByTurn(
     val isDisposed = AtomicBoolean(false)
     val sessionGeneration = AtomicLong(0L)
     private var eventSink: EventChannel.EventSink? = null
+    private var backPressCallback: androidx.activity.OnBackPressedCallback? = null
 
     fun sendEvent(event: MapBoxRouteProgressEvent) {
         if (isDisposed.get()) return
@@ -147,15 +148,19 @@ open class TurnByTurn(
         // Register back press handler once per navigation session.
         // This intercepts the Android back button/gesture so Mapbox's internal
         // back handling (which returns to FreeDrive screen) is bypassed.
+        // Remove any previous callback to avoid accumulation on view rebuilds.
+        backPressCallback?.remove()
         val act = this.activity
         if (act is androidx.activity.ComponentActivity) {
-            act.onBackPressedDispatcher.addCallback(act, object : androidx.activity.OnBackPressedCallback(true) {
+            val callback = object : androidx.activity.OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (!isDisposed.get()) {
                         finishNavigation()
                     }
                 }
-            })
+            }
+            backPressCallback = callback
+            act.onBackPressedDispatcher.addCallback(act, callback)
         }
     }
 
@@ -209,6 +214,7 @@ open class TurnByTurn(
             return
         }
         this.isNavigationCanceled = false
+        this.hasTriggeredArrival = false
         val currentGen = sessionGeneration.incrementAndGet()
 
         val arguments = methodCall.arguments as? Map<*, *>
@@ -381,6 +387,8 @@ open class TurnByTurn(
         }
         sessionGeneration.incrementAndGet()
         try {
+            backPressCallback?.remove()
+            backPressCallback = null
             MapboxNavigationApp.current()?.stopTripSession()
             unregisterObservers()
         } catch (e: Exception) {
