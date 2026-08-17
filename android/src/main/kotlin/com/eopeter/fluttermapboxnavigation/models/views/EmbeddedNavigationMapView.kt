@@ -71,7 +71,7 @@ class EmbeddedNavigationMapView(
     }
 
     /**
-     * Notifies with attach and detach events on [MapView]
+     * Notifies with attach and detach events on [MapView];
      */
     private val onMapClick = object : MapViewObserver(), OnMapClickListener {
 
