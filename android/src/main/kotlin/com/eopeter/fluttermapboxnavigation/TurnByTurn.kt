@@ -276,9 +276,8 @@ open class TurnByTurn(
                         }
                     }
                     this@TurnByTurn.binding.navigationView.customizeViewBinders {
-                        this.infoPanelEndNavigationButtonBinder = UIBinder { viewGroup ->
-                            viewGroup.removeAllViews()
-                            object : UIComponent() {}
+                        this.infoPanelEndNavigationButtonBinder = CustomInfoPanelEndNavButtonBinder(this@TurnByTurn.activity) {
+                            finishNavigation()
                         }
                         this.infoPanelStartNavigationButtonBinder = UIBinder { viewGroup ->
                             viewGroup.removeAllViews()
